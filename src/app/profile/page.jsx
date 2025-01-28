@@ -21,6 +21,10 @@ function page() {
             <h3 className='text-lg text-gray-600 font-medium'>Level</h3>
             <span className='text-gray-800'>New</span>
           </div>
+          <div className='flex justify-between items-center mb-2'>
+            <h3 className='text-lg text-gray-600 font-medium'>Expertise</h3>
+            <span className='text-gray-800'>Body building</span>
+          </div>
           <div className='flex justify-between items-center'>
             <h3 className='text-lg text-gray-600 font-medium'>Rating</h3>
             <span className='flex items-center'><FaStar size={15} /> -</span>

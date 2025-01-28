@@ -8,8 +8,15 @@ const NavStore = dynamic(() => import('../NavStore/NavStore'), { ssr: false })
 
 function NavStoreWrapper() {
     const pathname = usePathname();
-    const noFooterPaths = ["/login", "/sign_up", "/"];
-    return !noFooterPaths.includes(pathname) ? <NavStore /> : null;
+    const noNavStorePaths = [
+        "/login", "/sign_up", "/", 
+        "/admin/dashboard", 
+        "/admin/dashboard/overview", 
+        "/admin/dashboard/products",
+        "/admin/dashboard/client",
+        "/admin/dashboard/pt_management",
+    ];
+    return !noNavStorePaths.includes(pathname) ? <NavStore /> : null;
 }
 
 export default NavStoreWrapper

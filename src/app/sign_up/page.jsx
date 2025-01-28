@@ -1,15 +1,32 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import axios from "axios";
 
 function SignUpPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add sign-up logic here
+
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:5000/api/sign_up', {
+        username, email, password
+      });
+
+      console.log("User data:", response.data.user);
+      window.location.href = '/login';
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to sign up");
+    }
+
   };
 
   const [isClient, setIsClient] = useState(false);
@@ -69,6 +86,8 @@ function SignUpPage() {
           <div className="text-center mt-4">
             <a href='/login' className="text-blue-500">Already have account? Let login</a>
           </div>
+
+          {error && <p className='absolute text-red-600'>{error}</p>}
         </div>
       ) : (
         <></>

@@ -1,10 +1,10 @@
 import React from 'react'
 
-function Avata({width, height}) {
+function Avata({image_url, width, height}) {
     return (
         <div style={{ width: `${width}px`, height: `${height}px` }} className="rounded-full overflow-hidden">
             <img
-                src="/Avata.jpg"
+                src={image_url}
                 alt="Profile"
                 className="object-cover"
             />

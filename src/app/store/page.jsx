@@ -3,11 +3,21 @@
 import BannerSlider from '@/components/BannerSlider/BannerSlider';
 import Product from '@/components/Product/Product';
 import SubBanner from '@/components/SubBanner/SubBanner';
+import getCurrentUser from '@/utils/getCurrentUser';
 import React, { useEffect, useState } from 'react';
 import { FaAngleDown } from "react-icons/fa";
 
 
 function Page() {
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        const user = getCurrentUser();
+        if (user) {
+            setCurrentUser(user);
+        }
+    }, []);
+
     const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
@@ -48,9 +58,11 @@ function Page() {
                         <li className="px-4 py-2 hover:bg-gray-100 whitespace-nowrap">Calculate TDEE</li>
                     </ul>
                 </li>
-                <li className="relative group">
-                    <a href="/login" className="cursor-pointer group-hover:text-[#f36100] border-b-2 border-transparent group-hover:border-[#f36100] py-2 flex">Login</a>
-                </li>
+                {!currentUser && (
+                    <li className="relative group">
+                        <a href="/login" className="cursor-pointer group-hover:text-[#f36100] border-b-2 border-transparent group-hover:border-[#f36100] py-2 flex">Login</a>
+                    </li>
+                )}
             </ul>
 
             <div className='flex flex-col items-center gap-5'>

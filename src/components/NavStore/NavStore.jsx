@@ -1,9 +1,25 @@
-import React from 'react'
+'use client';
+import React, { useEffect, useState } from 'react'
 import { FaShoppingCart } from "react-icons/fa";
 import SearchBar from '@/components/SearchBar/SearchBar';
 import Avata from '../Avata/Avata';
+import axios from 'axios';
+import getCurrentUser from '@/utils/getCurrentUser';
 
 function NavStore() {
+    const currentUser = getCurrentUser();
+    console.log(currentUser);
+
+    const handleLogout = async () => {
+        try {
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        } catch (error) {
+            console.log(error, "Error with handleLogout");
+        }
+
+    }
+
     return (
         <div className="bg-[#f36100] flex justify-between px-10 py-3 items-center shadow-md">
             <a href='/' className="text-5xl font-extrabold text-white">GYM</a>
@@ -12,18 +28,22 @@ function NavStore() {
 
             <div className="relative group">
                 <button className="flex items-center space-x-3 focus:outline-none">
-                    <Avata width={40} height={40} />
+                    <Avata image_url={"/Avata.jpg"} width={40} height={40} />
 
-                    <span className="text-white text-xl font-semibold">Account</span>
+                    <span className="text-white text-xl font-semibold">{currentUser ? currentUser.username : "Account"}</span>
                 </button>
                 <div className="absolute right-0 w-48 bg-white rounded-md shadow-lg py-1 z-20 hidden group-hover:block text-gray-700">
-                    <a href="/my_profile" className="block px-4 py-2 text-sm hover:bg-gray-100 text-orange-600">Find Gymbro</a>
-                    <a href="/hire_pt" className="block px-4 py-2 text-sm hover:bg-gray-100">Hire PT</a>
-                    <a href="/find_clients" className="block px-4 py-2 text-sm hover:bg-gray-100">Find Clients</a>
-                    <a href="/my_profile" className="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
-                    <a href="/settings" className="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
-                    <a href="/admin/dashboard" className="block px-4 py-2 text-sm hover:bg-gray-100">Dashboard Admin</a>
-                    <a href="/logout" className="block px-4 py-2 text-sm hover:bg-gray-100">Logout</a>
+                    <a href={currentUser ? "/my_profile" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100 text-orange-600">Find Gymbro</a>
+                    <a href={currentUser ? "/hire_pt" : '/login'} className="block px-4 py-2 text-sm hover:bg-gray-100">Hire PT</a>
+                    <a href={currentUser ? "/find_clients" : '/login'} className="block px-4 py-2 text-sm hover:bg-gray-100">Find Clients</a>
+                    <a href={currentUser ? "/my_profile" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
+                    <a href={currentUser ? "/settings" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
+                    {currentUser.isAdmin && (
+                        <a href="/admin/dashboard" className="block px-4 py-2 text-sm hover:bg-gray-100">Dashboard Admin</a>)
+                    }
+                    {currentUser &&
+                        <div  onClick={handleLogout} className="block px-4 py-2 text-sm hover:bg-gray-100">Logout</div>
+                    }
                 </div>
             </div>
 
