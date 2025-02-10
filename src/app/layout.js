@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import FooterWrapper from "@/components/FooterWarpper/FooterWarpper";
 import NavStoreWrapper from "@/components/NavStoreWrapper/NavStoreWrapper";
+import { UserProvider } from "@/context/UserContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,12 +12,15 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+
   return (
     <html lang="en">
       <body className="relative">
-        <NavStoreWrapper/>
-        {children}
-        <FooterWrapper />
+        <UserProvider>
+          <NavStoreWrapper />
+          {children}
+          <FooterWrapper />
+        </UserProvider>
       </body>
     </html>
   );

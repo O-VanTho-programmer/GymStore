@@ -15,6 +15,10 @@ function NavStoreWrapper() {
         "/admin/dashboard/products",
         "/admin/dashboard/client",
         "/admin/dashboard/pt_management",
+        "/admin/dashboard/products/add_product",
+        "/world",
+        "/find_pt"
+        
     ];
     return !noNavStorePaths.includes(pathname) ? <NavStore /> : null;
 }

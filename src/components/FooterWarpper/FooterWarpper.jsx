@@ -10,9 +10,10 @@ export default function FooterWrapper() {
     "/admin/dashboard",
     "/admin/dashboard/overview",
     "/admin/dashboard/products",
-    "/admin/dashboard/user",
+    "/admin/dashboard/client",
     "/admin/dashboard/pt_management",
-    "/admin/dashboard/transactions"
+    "/admin/dashboard/transactions",
+    "/admin/dashboard/products/add_product"
   ];
 
   return !noFooterPaths.includes(pathname) ? <Footer /> : null;

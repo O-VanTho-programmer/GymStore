@@ -2,16 +2,23 @@
 import React, { useEffect, useState } from 'react';
 import SearchBar from '../../../SearchBar/SearchBar';
 import ButtonSmall from '../../../ButtonSmall/ButtonSmall';
+import axios from 'axios';
 
 function ProductTableAdmin() {
     const [products, setProducts] = useState([]);
 
-    // useEffect(() => {
-    //     fetch('/api/products')
-    //         .then(response => response.json())
-    //         .then(data => setProducts(data))
-    //         .catch(error => console.error('Error fetching products:', error));
-    // }, []);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await axios.get("http://localhost:5000/api/get_product");
+                setProducts(res.data.products);
+            } catch (error) {
+                console.log("Error fetch product data", error);
+            }
+        }
+
+        fetchData();
+    }, [])
 
     return (
         <div className='flex-1 p-4 border border-gray-300 bg-white shadow-md rounded-md'>
@@ -19,7 +26,9 @@ function ProductTableAdmin() {
 
             <div className="border-b border-black flex justify-between gap-5">
                 <SearchBar />
-                <ButtonSmall text={"Add Products"} />
+                <a href='/admin/dashboard/products/add_product' className='w-fit'>
+                    <ButtonSmall text={"Add Products"} />
+                </a>
             </div>
 
             <table className='min-w-full bg-white'>
@@ -37,12 +46,12 @@ function ProductTableAdmin() {
                 <tbody>
                     {products && products.map(product => (
                         <tr key={product.id}>
-                            <td className='py-2'>{product.id}</td>
-                            <td className='py-2'>{product.name}</td>
-                            <td className='py-2'>{product.stock}</td>
-                            <td className='py-2'>{product.category}</td>
-                            <td className='py-2'>{product.costPrice}</td>
-                            <td className='py-2'>{product.sellPrice}</td>
+                            <td className='py-2 text-center'>{product.id}</td>
+                            <td className='py-2 text-center'>{product.name}</td>
+                            <td className='py-2 text-center'>{product.stock_quantity}</td>
+                            <td className='py-2 text-center'>{product.category_name}</td>
+                            <td className='py-2 text-center'>{product.cost_price}</td>
+                            <td className='py-2 text-center'>{product.sell_price}</td>
                             <td className='py-2'>
                                 <button className='text-blue-500 hover:text-blue-700 mr-2'>View</button>
                                 <button className='text-green-500 hover:text-green-700'>Edit</button>

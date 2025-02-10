@@ -1,0 +1,41 @@
+.number_control {
+    display: flex;
+    align-items: center;
+}
+
+.number_left::before,
+.number_right::after {
+    content: attr(data-content);
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ced4da;
+    width: 30px;
+    color: gray;
+    transition: background-color 0.3s;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.number_left::before {
+    content: "-";
+}
+
+.number_right::after {
+    content: "+";
+}
+
+.number_quantity {
+    padding: 0.25rem;
+    border: 0;
+    width: 50px;
+    -moz-appearance: textfield;
+    border-top: 1px solid #ced4da;
+    border-bottom: 1px solid #ced4da;
+}
+
+.number_left:hover::before,
+.number_right:hover::after {
+    background-color: rgb(213, 212, 212);
+}

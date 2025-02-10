@@ -1,10 +1,9 @@
+'use client';
 import React from 'react';
+import { motion } from 'framer-motion';
 import BannerSlider from '@/components/BannerSlider/BannerSlider';
-import { BsFilePersonFill } from "react-icons/bs";
-import { IoMdFitness } from "react-icons/io";
-import { GiThreeFriends } from "react-icons/gi";
-import { FaPerson } from "react-icons/fa6";
 import Navar from '@/components/Navar/Navar';
+import { FaShieldAlt } from 'react-icons/fa';
 
 const IMAGES = ["/PT.png", "equipment.jpg", "friends.jpg"];
 const TITLES = ['Get yourself a personal trainer', 'Every gymer should have', 'Lets find yourself a gym bro'];
@@ -20,49 +19,82 @@ const HomePage = () => {
       </div>
 
       <div id='services' className="sector py-16 bg-gray-100 text-gray-700 flex flex-col items-center text-center">
-        <h1 className='text-4xl font-bold text-center mb-8'>Our Service</h1>
-        <p className='text-gray-700 w-[60%] mb-12'>
+        <p className='text-gray-700 w-full md:w-3/5 mb-12 px-4'>
           At GYM APP, we bring personal trainers and clients together while offering everything you need for a complete fitness experience. Whether you're a personal trainer looking to grow your clientele or a fitness enthusiast seeking guidance, tools, or community, we’ve got you covered.
         </p>
 
-        <div className='flex flex-wrap justify-center space-x-4'>
-          <div className='bg-white p-8 m-4 rounded-lg shadow-lg w-[300px] mr-0 flex flex-col items-center'>
-            <BsFilePersonFill className='text-4xl mb-4' />
-            <h2 className='text-2xl font-semibold mb-4'>For PT</h2>
-            <ul className='text-start list-disc list-inside'>
-              <li><strong>Grow Your Business</strong>: Create a profile, showcase expertise, and gain visibility to attract clients.</li>
-              <li><strong>Streamlined Management</strong>: Manage bookings, track progress, and receive secure payments effortlessly.</li>
-            </ul>
+        {/* Section 1 */}
+        <div className='flex flex-col md:flex-row mb-12 max-w-[1140px] text-start items-center bg-white shadow-lg rounded-lg overflow-hidden'>
+          <div className='flex-1 p-5'>
+            <h2 className='mb-4 text-black'>We provide users a platform to connect & hire PT</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <a href="/find_pt" className="inline-block mt-5 text-white bg-orange-500 py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out transform hover:bg-orange-600 hover:scale-105 shadow-md hover:shadow-lg">
+              Find One
+            </a>
           </div>
+          <motion.div
+            className='flex-1 p-5 relative'
+            initial={{ opacity: 0, x: 100 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9 }}
+            viewport={{ once: true }}
+          >
+            <img src='/friendGym.jpg' className='w-full h-auto object-cover rounded-lg shadow-lg' />
+            <div className='absolute flex bg-orange-500 text-white p-4 items-center bottom-[-5px] left-[-10px] gap-3'>
+              <span className='text-4xl font-bold p-3 rounded-full bg-white text-orange-600'>50+</span>
+              <div className='text-3xl font-semibold'>
+                <h3 >Users Join As</h3>
+                <h3>PT</h3>
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
-          <div className='bg-white p-8 m-4 rounded-lg shadow-lg w-[300px] flex flex-col items-center'>
-            <IoMdFitness className='text-4xl mb-4' />
-            <h2 className='text-2xl font-semibold mb-4'>For Clients</h2>
-            <ul className='text-start list-disc list-inside'>
-              <li><strong>Find Your Ideal Trainer</strong>: Browse certified trainers by expertise and location.</li>
-              <li><strong>Personalized Coaching</strong>: Access tailored workout and nutrition plans to fit your unique goals.</li>
-            </ul>
+        {/* Section 2 */}
+        <div className='flex flex-col md:flex-row mb-12 max-w-[1140px] text-start items-center bg-white shadow-lg rounded-lg overflow-hidden'>
+          <motion.div
+            className='flex-1 p-5 relative'
+            initial={{ opacity: 0, x: -100 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9 }}
+            viewport={{ once: true }}
+          >
+            <img src='/storeHero.png' className='w-full h-auto object-cover rounded-lg shadow-lg' />
+            <div className='absolute flex bg-orange-500 text-white p-4 items-center bottom-[-5px] right-[-10px] gap-3'>
+              <span className='text-4xl font-bold p-3 rounded-full bg-white text-orange-600'><FaShieldAlt /></span>
+              <div className='text-3xl font-semibold'>
+                <h3>All Products</h3>
+                <h3>Come with Warranty</h3>
+              </div>
+            </div>
+          </motion.div>
+          <div className='flex-1 p-5 text-start'>
+            <h2 className='mb-4 text-black'>Our Store Is Certified</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <a href="/store" className="inline-block mt-5 text-white bg-orange-500 py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out transform hover:bg-orange-600 hover:scale-105 shadow-md hover:shadow-lg">
+              Visit Store
+            </a>
           </div>
+        </div>
 
-          <div className='bg-white p-8 m-4 rounded-lg shadow-lg w-[300px] flex flex-col items-center'>
-            <GiThreeFriends className='text-4xl mb-4' />
-            <h2 className='text-2xl font-semibold mb-4'>Equipment</h2>
-            <ul className='text-start list-disc list-inside'>
-              <li><strong>Premium Selection</strong>: Shop durable, high-performance equipment from trusted brands.</li>
-              <li><strong>Convenient Delivery</strong>: Get your gear delivered straight to your door with ease.</li>
-              <li><strong>Versatile Products</strong>: From dumbbells to advanced training gear, find everything you need for home or professional use.</li>
-            </ul>
+        {/* Section 3 */}
+        <div className='flex flex-col md:flex-row mb-12 max-w-[1140px] text-start items-center bg-white shadow-lg rounded-lg overflow-hidden'>
+          <div className='flex-1 p-5 text-start'>
+            <h2 className='mb-4 text-black'>Gamify Workout</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <a href="#" className="inline-block mt-5 text-white bg-orange-500 py-3 px-6 rounded-lg text-lg font-semibold transition duration-300 ease-in-out transform hover:bg-orange-600 hover:scale-105 shadow-md hover:shadow-lg">
+              Let Play
+            </a>
           </div>
-
-          <div className='bg-white p-8 m-4 rounded-lg shadow-lg w-[300px] flex flex-col items-center'>
-            <FaPerson className='text-4xl mb-4' />
-            <h2 className='text-2xl font-semibold mb-4'>Find Friends</h2>
-            <ul className='text-start list-disc list-inside'>
-              <li><strong>Connect with new people</strong>: Meet new friends who share your passion for fitness.</li>
-              <li><strong>Stay Motivated</strong>: Keep each other accountable and motivated to reach your goals.</li>
-              <li><strong>Share Tips and Tricks</strong>: Exchange workout routines, nutrition advice, and more to enhance your fitness journey.</li>
-            </ul>
-          </div>
+          <motion.div
+            className='flex-1 p-5 relative'
+            initial={{ opacity: 0, x: 100 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9 }}
+            viewport={{ once: true }}
+          >
+            <img src='/gamifyWorkout.jpg' className='w-full h-auto object-cover rounded-lg shadow-lg' />
+          </motion.div>
         </div>
       </div>
     </div>

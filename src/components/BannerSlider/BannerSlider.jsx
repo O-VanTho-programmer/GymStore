@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import styles from './BannerSlider.module.css';
+import StyledBTN from '../StyledBTN/StyledBTN';
 
 function BannerSlider({ image_url, title, span_btn, link }) {
   const [slide_index, setSlideIndex] = useState(0);
@@ -40,21 +41,14 @@ function BannerSlider({ image_url, title, span_btn, link }) {
               className="absolute w-full h-full object-cover"
             />
 
-            {title[index] !== "" && (
+            {title && title[index] !== "" && (
               <div className="overlay absolute w-full h-full bg-black opacity-50"></div>
             )}
 
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center text-center">
               <h1 className="text-5xl font-bold text-white mb-8">{title && title[index]}</h1>
               {span_btn && span_btn[index] !== "" && (
-                <button
-                  onClick={() => window.location.href = link && link[index]}
-                  className={`${styles.btn_23} hover:bg-[#f36100]`}
-                >
-                  <span className={styles.text}>{span_btn[index]}</span>
-                  <span aria-hidden="" className={styles.marquee}>{span_btn[index]}</span>
-
-                </button>
+                <StyledBTN link={link[index]} span_btn={span_btn[index]}/>
               )}
             </div>
           </a>
