@@ -19,7 +19,7 @@ function page() {
 
       <div className='flex gap-4'>
         {titles.map((_, i) => (
-          <JobFilterBtn icon={Icons[i]} title={titles[i]} link={links[i]} />
+          <JobFilterBtn key={i} icon={Icons[i]} title={titles[i]} link={links[i]} />
         ))}
       </div>
 

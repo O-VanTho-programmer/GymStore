@@ -6,7 +6,7 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-function Page() {
+function page() {
   const { currentUser } = useUser();
   const { category } = useParams();
   const [categoryDetail, setCategoryDetail] = useState(null);
@@ -82,4 +82,4 @@ function Page() {
   );
 }
 
-export default Page;
+export default page;

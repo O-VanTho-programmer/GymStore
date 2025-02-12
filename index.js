@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const uploadRoutes = require('./src/utils/upload');
+const { useId } = require('react');
 
 const app = express();
 app.use(cors()); // Enable CORS for all routes
@@ -275,7 +276,7 @@ app.get('/api/get_product_by_category/:categoryId', async (req, res) => {
 
     const formattedProducts = products.map(product => ({
       ...product,
-      sell_price : product.sell_price.toLocaleString('vi-VN') + '.000₫',
+      sell_price: product.sell_price.toLocaleString('vi-VN') + '.000₫',
       genders: product.genders ? product.genders.split(',') : [],
       sizes: product.sizes ? product.sizes.split(',') : [],
       images: product.images,
@@ -487,6 +488,57 @@ app.post('/api/buy_now', async (req, res) => {
   }
 })
 
+// USER PROFILE
+app.get('/api/get_user_profile/:name_path', async (req, res) => {
+  const { name_path } = req.body;
+
+  try {
+    const query = `
+      SELECT 
+        u.id AS user_id, 
+        u.name AS trainer_name, 
+        GROUP_CONCAT(e.name SEPARATOR ', ') AS expertise_list
+      FROM users u
+      JOIN pt_expertise pe ON u.id = pe.user_id
+      JOIN expertise e ON pe.expertise_id = e.id
+      WHERE u.name_path = ?
+      GROUP BY u.id;
+    `
+
+    const [user] = await db.query(query, [name_path]);
+
+    res.json({ user });
+  } catch (error) {
+    console.log("Error", error);
+  }
+})
+
+app.get('/api/get_my_profile/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `
+      SELECT 
+        p.*,
+        u.username,
+        u.is_personal_trainer,
+        u.avatar,
+        GROUP_CONCAT(e.expertise SEPARATOR ', ') AS expertise_list
+      FROM profile p
+      JOIN user u ON u.userId = p.user_id
+      LEFT JOIN pt_expertise pe ON pe.profile_id = p.id
+      LEFT JOIN expertise e ON e.id = pe.expertise_id
+      WHERE p.user_id = ?
+      GROUP BY p.id;
+    `;
+    const [profile] = await db.query(query, [userId]);
+    res.json({ profile });
+
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+})
 
 
 const PORT = process.env.PORT || 5000;

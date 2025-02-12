@@ -1,11 +1,30 @@
 'use client'
 
 import Avata from '@/components/Avata/Avata';
-import { MdKeyboardArrowRight } from "react-icons/md";
 import { FaStar } from "react-icons/fa";
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import axios from 'axios';
 
 function page() {
+
+  const { name } = useParams();
+
+  
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/get_user_profile/${name}`);
+
+      } catch (error) {
+        
+      }
+    }
+
+    fetchData();
+  }, [name])
+
   return (
     <div className='flex flex-col md:flex-row justify-between py-5 px-8 gap-6 bg-gray-100 min-h-screen'>
       <div className='flex flex-col gap-6 bg-white p-6 rounded-lg shadow-md w-full md:w-1/3 max-w-[320px]'>

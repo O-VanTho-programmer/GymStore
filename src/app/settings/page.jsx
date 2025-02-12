@@ -53,7 +53,7 @@ function page() {
 
                     <div className='flex gap-2 justify-end mb-8 text-lg'>
                         <p className='text-gray-600'>Need to update your public profile?</p>
-                        <a className='text-blue-500' href='/profile/edit'>Go to edit profile</a>
+                        <a className='text-blue-500' href='/my_profile'>Go to edit profile</a>
                     </div>
 
                     <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
