@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-function EditAboutMePopup({ onClose, onSave }) {
-    const [aboutMe, setAboutMe] = useState('Hello, my name is Van Tho...');
+function EditAboutMePopup({ onClose, onSave, content }) {
+    const [aboutMe, setAboutMe] = useState(content);
 
     const handleSave = () => {
         onSave(aboutMe);

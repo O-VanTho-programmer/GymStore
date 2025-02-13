@@ -1,22 +1,30 @@
 'use client'
 
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
-export default function EditExpertise({ initialExpertise, initialServices, onClose, onSave }) {
-    const [expertise, setExpertise] = useState(initialExpertise);
-    const [services, setServices] = useState(initialServices);
-    const [newService, setNewService] = useState('');
+export default function EditExpertise({ profile_expertise, onClose, onSave }) {
+    const [expertises, setExpertises] = useState([])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/api/get_expertises`);
+                setExpertises(res.data.expertises);
+            } catch (error) {
+                console.log("Error fetch expertises", error);
+            }
+        }
+
+        fetchData();
+    }, [])
 
     const handleAddService = () => {
-        if (newService.trim()) {
-            setServices([...services, newService.trim()]);
-            setNewService('');
-        }
+       
     };
 
     const handleRemoveService = (index) => {
-        const updatedServices = services.filter((_, i) => i !== index);
-        setServices(updatedServices);
+        
     };
 
     return (
@@ -29,7 +37,6 @@ export default function EditExpertise({ initialExpertise, initialServices, onClo
                     <input
                         type="text"
                         value={expertise}
-                        onChange={(e) => setExpertise(e.target.value)}
                         className="w-full p-2 border rounded-lg"
                     />
                 </div>
@@ -40,7 +47,6 @@ export default function EditExpertise({ initialExpertise, initialServices, onClo
                         <input
                             type="text"
                             value={newService}
-                            onChange={(e) => setNewService(e.target.value)}
                             className="flex-1 p-2 border rounded-lg"
                             placeholder="Add new service"
                         />

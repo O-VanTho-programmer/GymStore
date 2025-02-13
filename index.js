@@ -3,18 +3,49 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const uploadRoutes = require('./src/utils/upload');
-const { useId } = require('react');
+const upload = require('./src/utils/upload');
 
 const app = express();
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // To parse incoming JSON data
 
-// Serve static files from public folder
-app.use('/uploads', express.static('public/uploads'));
+// Serve static files for uploaded media
+app.use('/uploads/images', express.static('public/uploads/images'));
+app.use('/uploads/videos', express.static('public/uploads/videos'));
 
-// Image upload route
-app.use('/api', uploadRoutes);
+app.post('/api/upload/image', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Invalid file type or no image uploaded' });
+  }
+
+  res.json({ message: 'Image uploaded successfully', imageUrl: `/uploads/images/${req.file.filename}` });
+});
+
+app.post('/api/upload/video', upload.single('video'), async (req, res) => {
+  const { profileId } = req.body;
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'Invalid file type or no video uploaded' });
+  }
+
+  if (!profileId) {
+    return res.status(400).json({ error: 'Profile ID is required' });
+  }
+
+  const videoUrl = `/uploads/videos/${req.file.filename}`;
+
+  try {
+    const query = `UPDATE profile SET video_url = ? WHERE id = ?`;
+    await db.query(query, [videoUrl, profileId]);
+
+    res.json({ message: 'Video uploaded and saved successfully', videoUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database update failed' });
+  }
+
+});
+
 
 // MySQL connection setup
 const db = mysql.createConnection({
@@ -414,7 +445,7 @@ app.get('/api/get_order_quantity/:userId', async (req, res) => {
   }
 })
 
-app.post('/api/get_order_detail/', async (req, res) => {
+app.post('/api/get_order_detail', async (req, res) => {
   const { userId } = req.body;
 
   try {
@@ -529,9 +560,13 @@ app.get('/api/get_my_profile/:userId', async (req, res) => {
       LEFT JOIN pt_expertise pe ON pe.profile_id = p.id
       LEFT JOIN expertise e ON e.id = pe.expertise_id
       WHERE p.user_id = ?
-      GROUP BY p.id;
+      GROUP BY p.id
     `;
-    const [profile] = await db.query(query, [userId]);
+    const [profiles] = await db.query(query, [userId]);
+
+    const profile = profiles[0];
+    profile.expertise_list = profile.expertise_list ? profile.expertise_list.split(",") : []
+    
     res.json({ profile });
 
   } catch (error) {
@@ -539,6 +574,34 @@ app.get('/api/get_my_profile/:userId', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch profile" });
   }
 })
+
+// Edit my profile
+app.post('/api/edit_about_me', async (req, res) => {
+  const { profileId, content } = req.body;
+
+  if (!profileId || !content) {
+    return res.status(400).json({ message: "Missing profileId or content." });
+  }
+
+  try {
+    const query = `
+      UPDATE profile
+      SET about_me = ?
+      WHERE id = ?
+    `;
+
+    await db.query(query, [content, profileId]);
+    res.json({ message: "Edit content successfully!" });
+  } catch (error) {
+    console.error("Error updating about_me:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+});
+
+app.post(`'/api/upload_intro_video`, async (req, res) => {
+
+})
+
 
 
 const PORT = process.env.PORT || 5000;
@@ -556,3 +619,5 @@ process.on('SIGINT', () => {
     process.exit();
   });
 });
+
+module.exports = db;

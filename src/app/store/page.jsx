@@ -43,7 +43,7 @@ function Page() {
     return (
         <div className='bg-white shadow-lg'>
             <div className='flex flex-col items-center gap-5'>
-                <div className='max-h-[460px] w-[1200px] flex gap-2'>
+                <div className='max-h-[460px] w-full flex gap-2'>
                     <div className='w-[75%] h-[460px]'>
                         <BannerSlider image_url={IMAGES} title={TITLES} span_btn={SPAN_BTNS} link={LINKS} />
                     </div>
@@ -55,7 +55,7 @@ function Page() {
                     </div>
                 </div>
 
-                <div className='w-[1200px] product_container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                <div className='w-full product_container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4'>
                     {products.map((p) => (
                         <Product key={p.id} user={currentUser} productId={p.id} image_url={p.images.split(',')[0]} link={`store/product/${p.id}`} price={p.sell_price} product_name={p.name} rating={p.rating} />
                     ))}
