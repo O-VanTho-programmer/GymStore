@@ -16,5 +16,7 @@ export default function FooterWrapper() {
     "/admin/dashboard/products/add_product"
   ];
 
-  return !noFooterPaths.includes(pathname) ? <Footer /> : null;
+  const shouldHideFooter = noFooterPaths.includes(pathname) || pathname.startsWith('/admin');
+
+  return !shouldHideFooter ? <Footer /> : null;
 }

@@ -13,6 +13,8 @@ import EditClientShowCase from '@/components/SettingProfile/EditClientShowCase/E
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
 import InformMessage from '@/components/InformMessage/InformMessage';
+import FitGig from '@/components/FitGig/FitGig';
+import Review from '@/components/Review/Review';
 
 function ProfilePage() {
 
@@ -21,7 +23,9 @@ function ProfilePage() {
     const [isExpertisePopupOpen, setIsExpertisePopupOpen] = useState(false);
     const [isIntroVideoPopupOpen, setIsIntroVideoPopupOpen] = useState(false);
     const [isClientsPopupOpen, setIsClientsPopupOpen] = useState(false);
+    const [isGigPopupOpen, setIsGigPopupOpen] = useState(false);
     const [profile, setProfile] = useState(null);
+    const [gigs, setGigs] = useState(null);
     const [message, setMessage] = useState("");
 
     const showMessage = (message) => {
@@ -34,9 +38,9 @@ function ProfilePage() {
         const fetchData = async () => {
             try {
                 const res = await axios.get(`http://localhost:5000/api/get_my_profile/${currentUser.userId}`);
-                const data = res.data.profile;
-                console.log(data)
-                setProfile(data);
+
+                setProfile(res.data.profile);
+                setGigs(res.data.gigs);
 
             } catch (error) {
                 console.error("Error fetching profile:", error);
@@ -90,7 +94,7 @@ function ProfilePage() {
                     </div>
                     <div className='flex justify-between items-center mb-2'>
                         <h3 className='text-lg text-gray-600 font-medium'>Expertise</h3>
-                        <span className='text-gray-800'>{profile.expertise_list[0] || "No expertise listed"}</span>
+                        <span className='text-gray-800'>{profile?.expertise_list[0]?.expertise || "No expertise listed"}</span>
                     </div>
                     <div className='flex justify-between items-center'>
                         <h3 className='text-lg text-gray-600 font-medium'>Rating</h3>
@@ -120,13 +124,13 @@ function ProfilePage() {
                                 const isMainExpertise = i === 0;
                                 return (
                                     <p
-                                        key={i}
+                                        key={exp.id}
                                         className={`
                             ${isMainExpertise ? "border-2 border-orange-600 text-orange-600 font-semibold text-sm" : "border border-gray-300 text-gray-600 text-sm"} 
                             rounded-3xl p-2 mt-2 mb-4
                         `}
                                     >
-                                        {exp}
+                                        {exp.expertise}
                                     </p>
                                 );
                             })
@@ -163,15 +167,24 @@ function ProfilePage() {
                 <div className='border border-gray-300 rounded-lg p-6 md:p-9'>
                     <h2 className='text-2xl font-bold mb-6'>Review from clients</h2>
                     {/* Placeholder review data */}
-                    <div className='w-full p-4 flex flex-col gap-4 border border-gray-300 rounded-lg'>
-                        <div>
-                            <h3 className='text-lg font-semibold'>Bao Lam</h3>
-                            <div className='flex gap-1'>
-                                <span className='text-gray-500'>Rating:</span>
-                                <span className='flex items-center'><FaStar size={15} className='text-yellow-300' /> 4</span>
-                            </div>
-                        </div>
-                        <p>This is the best PT I have ever hired.</p>
+                    <Review avatar={""} username={'Bao Lam'} rating={4} comment={"Nice training"}  />
+                </div>
+
+                <div className='border border-gray-300 rounded-lg p-6 md:p-9'>
+                    <div className='flex items-center justify-between'>
+                        <h2 className='text-2xl font-bold mb-6'>Your FitGigs</h2>
+                        <ButtonSmall onClick={() => {window.location.href = `my_profile/create_gig/${profile.id}`}} text={"Add gigs"} />
+                    </div>
+
+                    <div className='flex overflow-x-scroll gap-2'>
+                        {gigs && gigs.map((g) => {
+                            return (
+                                <div key={g.id} className=' shadow-xl p-2'>
+                                    <FitGig gig={g} profile={profile} />
+                                </div>
+                            )
+                        })}
+
                     </div>
                 </div>
             </div>
@@ -187,7 +200,7 @@ function ProfilePage() {
 
             {isExpertisePopupOpen && (
                 <EditExpertise
-                    
+                    profile_expertise={profile.expertise_list}
                     onClose={() => setIsExpertisePopupOpen(false)}
                     onSave={(newExpertise) => {
                         if (newExpertise !== profile.expertise_list) {
@@ -195,6 +208,7 @@ function ProfilePage() {
                         }
                         setIsExpertisePopupOpen(false);
                     }}
+                    profileId={profile.id}
                 />
             )}
 

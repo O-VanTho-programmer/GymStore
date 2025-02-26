@@ -55,7 +55,7 @@ function Page() {
                     </div>
                 </div>
 
-                <div className='w-full product_container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                <div className='w-full product_container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 px-28 py-10'>
                     {products.map((p) => (
                         <Product key={p.id} user={currentUser} productId={p.id} image_url={p.images.split(',')[0]} link={`store/product/${p.id}`} price={p.sell_price} product_name={p.name} rating={p.rating} />
                     ))}

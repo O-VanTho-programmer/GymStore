@@ -2,7 +2,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import BannerSlider from '@/components/BannerSlider/BannerSlider';
-import Navar from '@/components/Navar/Navar';
 import { FaShieldAlt } from 'react-icons/fa';
 
 const IMAGES = ["/PT.png", "equipment.jpg", "friends.jpg"];
@@ -13,7 +12,6 @@ const LINKS = ['/pt', '/store', '/find_friends'];
 const HomePage = () => {
   return (
     <div>
-      <Navar />
       <div className='h-screen'>
         <BannerSlider image_url={IMAGES} title={TITLES} span_btn={SPAN_BTNS} link={LINKS} />
       </div>

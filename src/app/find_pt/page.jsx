@@ -1,5 +1,5 @@
 import JobFilterBtn from '@/components/JobFilterBtn/JobFilterBtn'
-import PTCard from '@/components/PTCard/PTCard'
+import PTCard from '@/components/FitGig/FitGig'
 import { GrYoga } from "react-icons/gr";
 import React from 'react'
 import { IoBody } from 'react-icons/io5';

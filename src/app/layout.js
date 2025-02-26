@@ -3,6 +3,7 @@ import "./globals.css";
 import FooterWrapper from "@/components/FooterWarpper/FooterWarpper";
 import NavStoreWrapper from "@/components/NavStoreWrapper/NavStoreWrapper";
 import { UserProvider } from "@/context/UserContext";
+import NavWrapper from "@/components/NavWrapper/NavWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="relative">
         <UserProvider>
+          <NavWrapper />
           <NavStoreWrapper />
           {children}
           <FooterWrapper />

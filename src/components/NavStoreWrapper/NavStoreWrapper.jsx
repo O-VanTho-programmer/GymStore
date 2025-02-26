@@ -9,18 +9,13 @@ const NavStore = dynamic(() => import('../NavStore/NavStore'), { ssr: false })
 function NavStoreWrapper() {
     const pathname = usePathname();
     const noNavStorePaths = [
-        "/login", "/sign_up", "/", 
-        "/admin/dashboard", 
-        "/admin/dashboard/overview", 
-        "/admin/dashboard/products",
-        "/admin/dashboard/client",
-        "/admin/dashboard/pt_management",
-        "/admin/dashboard/products/add_product",
+        "/login", "/sign_up", "/",
         "/world",
-        "/find_pt"
-        
+
     ];
-    return !noNavStorePaths.includes(pathname) ? <NavStore /> : null;
+    const shouldHideNav = noNavStorePaths.includes(pathname) || pathname.startsWith('/find_pt') || pathname.startsWith('/admin') || pathname.startsWith('/my_profile') || pathname.startsWith('/payment');
+
+    return !shouldHideNav ? <NavStore /> : null;
 }
 
 export default NavStoreWrapper

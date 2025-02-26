@@ -30,9 +30,15 @@ export default function page() {
             <div>
                 <ProductItem id={id} user={currentUser} rating={averageRating} />
             </div>
-            <div className="bg-white">
+            {currentUser ? (
+                <div className="bg-white">
                 <ProductReview user={currentUser} productId={id} rating={averageRating} ratingCounts={ratingCounts} reviews={reviews} />
             </div>
+            ) : (
+                <div>
+                    Loading...
+                </div>
+            )}
         </div>
     );
 }

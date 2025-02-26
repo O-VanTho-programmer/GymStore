@@ -520,29 +520,211 @@ app.post('/api/buy_now', async (req, res) => {
 })
 
 // USER PROFILE
-app.get('/api/get_user_profile/:name_path', async (req, res) => {
-  const { name_path } = req.body;
+app.post('/api/create_gig_review', async (req, res) => {
+  const { userId, gig_id, rating, comment } = req.body;
+
+  try {
+    const query = `
+      INSERT INTO gig_review (gig_id, user_id, rating, content) VALUES (?, ?, ?, ?);
+    `
+
+    await db.query(query, [gig_id, userId, rating, comment])
+  } catch (error) {
+    console.log("Error add gig review", error);
+  }
+})
+
+app.get('/api/get_user_gig_detail/:gigId', async (req, res) => {
+  const { gigId } = req.params;
+
+  try {
+    // Fetch gig details
+    const queryGig = `
+      SELECT g.*, 
+             COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating,
+             COUNT(gr.id) AS numReviews,
+             p.id AS profile_id,
+             p.level,
+             p.about_me,
+             p.video_url,
+             u.username,
+             u.is_personal_trainer,
+             u.avatar
+      FROM fit_gigs g
+      JOIN profile p ON g.profile_id = p.id
+      JOIN user u ON p.user_id = u.userId
+      LEFT JOIN gig_review gr ON g.id = gr.gig_id
+      WHERE g.id = ?
+      GROUP BY g.id
+    `;
+
+    const [gigRows] = await db.query(queryGig, [gigId]);
+
+    if (gigRows.length === 0) {
+      return res.status(404).json({ error: 'Gig not found' });
+    }
+
+    const gig = gigRows[0];
+
+    // Fetch expertise related to the profile
+    const queryExpertise = `
+      SELECT e.id AS expertise_id, e.expertise
+      FROM pt_expertise pe
+      JOIN expertise e ON pe.expertise_id = e.id
+      WHERE pe.profile_id = ?
+    `;
+
+    const [expertiseRows] = await db.query(queryExpertise, [gig.profile_id]);
+
+    const profile = {
+      id: gig.profile_id,
+      level: gig.level,
+      about_me: gig.about_me,
+      video_url: gig.video_url,
+      username: gig.username,
+      is_personal_trainer: gig.is_personal_trainer,
+      avatar: gig.avatar,
+      expertise_list: expertiseRows.map((row) => ({
+        id: row.expertise_id,
+        expertise: row.expertise,
+      })),
+    };
+
+    const gigDetail = {
+      id: gig.id,
+      profile_id: gig.profile_id,
+      title: gig.title,
+      description: gig.description,
+      price: gig.price,
+      unit: gig.unit,
+      image_url: gig.image_url,
+      created_at: gig.created_at,
+      update_at: gig.update_at,
+      rating: gig.rating,
+      numReviews: gig.numReviews,
+    };
+
+    res.json({ gig: gigDetail, profile });
+  } catch (error) {
+    console.error('Error fetching gig detail:', error);
+    res.status(500).json({ error: 'Failed to fetch gig detail' });
+  }
+});
+
+app.get('/api/get_gig_review/:gigId', async (req, res) => {
+  const { gigId } = req.params;
 
   try {
     const query = `
       SELECT 
-        u.id AS user_id, 
-        u.name AS trainer_name, 
-        GROUP_CONCAT(e.name SEPARATOR ', ') AS expertise_list
-      FROM users u
-      JOIN pt_expertise pe ON u.id = pe.user_id
-      JOIN expertise e ON pe.expertise_id = e.id
-      WHERE u.name_path = ?
-      GROUP BY u.id;
-    `
+        gr.*,
+        u.username,
+        u.avatar,
+        u.name_path
+      FROM gig_review gr
+      JOIN user u ON u.userId = gr.user_id 
+      WHERE gig_id = ?
+    `;
 
-    const [user] = await db.query(query, [name_path]);
+    const [reviews] = await db.query(query, [gigId]);
 
-    res.json({ user });
+    res.json({ reviews });
   } catch (error) {
-    console.log("Error", error);
+    console.error('Error fetching gig reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch gig reviews' });
   }
 })
+
+app.get('/api/get_profile_review/:profileId', async (req, res) => {
+  const { profileId } = req.params;
+
+  try {
+    const query = `
+      SELECT gr.*, u.username, u.avatar, u.name_path
+      FROM gig_review gr
+      JOIN fit_gigs g ON gr.gig_id = g.id
+      JOIN user u ON u.userId = gr.user_id
+      WHERE g.profile_id = ?
+    `;
+
+    const [reviews] = await db.query(query, [profileId]);
+
+    res.json({ reviews });
+  } catch (error) {
+    console.error('Error fetching profile reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch profile reviews' });
+  }
+})
+
+app.get('/api/get_user_profile/:name_path', async (req, res) => {
+  const { name_path } = req.params;
+
+  try {
+    const queryUser = `SELECT userId FROM user WHERE name_path = ?`;
+    const [user] = await db.query(queryUser, [name_path]);
+
+    if (user.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userId = user[0].userId;
+
+    const queryProfile = `
+      SELECT 
+        p.*,
+       u.username,
+    u.is_personal_trainer,
+    u.avatar,
+    COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+  FROM profile p
+  JOIN user u ON u.userId = p.user_id
+  LEFT JOIN fit_gigs g ON g.profile_id = p.id
+  LEFT JOIN gig_review gr ON gr.gig_id = g.id
+  WHERE p.user_id = ?
+  GROUP BY p.id
+`;
+
+    const [profileRows] = await db.query(queryProfile, [userId]);
+
+    if (profileRows.length === 0) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const profile = profileRows[0];
+
+    const queryExpertise = `
+      SELECT e.id AS expertise_id, e.expertise
+      FROM pt_expertise pe
+      JOIN expertise e ON e.id = pe.expertise_id
+      WHERE pe.profile_id = ?
+    `;
+
+    const [expertiseRows] = await db.query(queryExpertise, [profile.id]);
+
+    profile.expertise_list = expertiseRows.map((row) => ({
+      id: row.expertise_id,
+      expertise: row.expertise,
+    }));
+
+
+    const queryGig = `
+      SELECT g.*, 
+        COUNT(gr.id) AS numReviews, 
+        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM fit_gigs g
+      LEFT JOIN gig_review gr ON gr.gig_id = g.id
+      WHERE g.profile_id = ?
+      GROUP BY g.id
+    `;
+
+    const [gigs] = await db.query(queryGig, [profile.id]);
+    res.json({ profile, gigs });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ error: "Failed to fetch profile" });
+  }
+});
+
 
 app.get('/api/get_my_profile/:userId', async (req, res) => {
   const { userId } = req.params;
@@ -554,20 +736,48 @@ app.get('/api/get_my_profile/:userId', async (req, res) => {
         u.username,
         u.is_personal_trainer,
         u.avatar,
-        GROUP_CONCAT(e.expertise SEPARATOR ', ') AS expertise_list
+        e.id AS expertise_id,
+        e.expertise
       FROM profile p
       JOIN user u ON u.userId = p.user_id
       LEFT JOIN pt_expertise pe ON pe.profile_id = p.id
       LEFT JOIN expertise e ON e.id = pe.expertise_id
       WHERE p.user_id = ?
-      GROUP BY p.id
     `;
-    const [profiles] = await db.query(query, [userId]);
+    const [rows] = await db.query(query, [userId]);
 
-    const profile = profiles[0];
-    profile.expertise_list = profile.expertise_list ? profile.expertise_list.split(",") : []
-    
-    res.json({ profile });
+    const profile = {
+      id: rows[0].id,
+      user_id: rows[0].user_id,
+      about_me: rows[0].about_me,
+      level: rows[0].level,
+      video_url: rows[0].video_url,
+      rating: rows[0].rating,
+      username: rows[0].username,
+      is_personal_trainer: rows[0].is_personal_trainer,
+      avatar: rows[0].avatar,
+      expertise_list: [],
+    };
+
+    rows.forEach((row) => {
+      if (row.expertise_id !== null) {
+        profile.expertise_list.push({ 'id': row.expertise_id, 'expertise': row.expertise });
+      }
+    });
+
+    const queryGig = `
+      SELECT g.*, 
+        COUNT(gr.id) AS numReviews, 
+        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM fit_gigs g
+      LEFT JOIN gig_review gr ON gr.gig_id = g.id
+      WHERE g.profile_id = ?
+      GROUP BY g.id
+    `;
+
+    const [gigs] = await db.query(queryGig, [profile.id]);
+
+    res.json({ profile, gigs });
 
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -598,11 +808,125 @@ app.post('/api/edit_about_me', async (req, res) => {
   }
 });
 
-app.post(`'/api/upload_intro_video`, async (req, res) => {
+app.get(`/api/get_expertises/:profileId`, async (req, res) => {
+  const { profileId } = req.params;
 
+  try {
+    if (profileId === 'all') {
+      const query = `SELECT * FROM expertise`;
+      const [expertise] = await db.query(query);
+      return res.json({ expertise });
+    } else {
+      const query = `
+        SELECT e.* 
+        FROM expertise e
+        WHERE e.id NOT IN (
+          SELECT pe.expertise_id FROM pt_expertise pe
+          WHERE pe.profile_id = ?
+        )
+      `;
+      const [expertises] = await db.query(query, [profileId]);
+      return res.json({ expertises });
+    }
+  } catch (error) {
+    console.error("Error fetching expertises:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+app.post('/api/edit_expertise', async (req, res) => {
+  const { expertises, profileId } = req.body;
+
+  try {
+    await db.query(`DELETE FROM pt_expertise WHERE profile_id = ?`, [profileId]);
+
+    const query = `INSERT INTO pt_expertise (profile_id, expertise_id) VALUES (?, ?)`;
+
+    for (const exp of expertises) {
+      await db.query(query, [profileId, exp.id]);
+    }
+
+    res.status(200).json({ message: 'Expertises updated successfully' });
+  } catch (error) {
+    console.error('Error updating expertises:', error);
+    res.status(500).json({ error: 'Failed to update expertises' });
+  }
+});
+
+app.post('/api/create_gig', upload.single('image'), async (req, res) => {
+  const { profile_id, title, description, expertise, packages } = req.body;
+  const parsedPackages = packages ? JSON.parse(packages) : [];
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'Image is required' });
+  }
+
+  const imageUrl = `/uploads/images/${req.file.filename}`;
+
+  try {
+    const query = `
+      INSERT INTO fit_gigs (profile_id, title, description, expertise_id, image_url)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    const [result] = await db.query(query, [profile_id, title, description, expertise, imageUrl]);
+
+    const packageQuery = `
+      INSERT INTO gig_package (gig_id, title, description, price, duration)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    for (const pkg of parsedPackages) {
+      await db.query(packageQuery, [result.insertId, pkg.title, pkg.description, pkg.price, pkg.duration]);
+    }
+
+    res.status(201).json({
+      message: 'Gig added successfully',
+      gig: {
+        id: result.insertId,
+        profile_id,
+        title,
+        description,
+        expertise,
+        imageUrl,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Database insertion failed' });
+  }
 })
+// Package of gig
+app.get('/api/get_packages/:gig_id', async (req, res) => {
+  const { gig_id } = req.params;
 
+  try {
+    const query = `SELECT title, description, price, duration FROM gig_package WHERE gig_id = ?`;
+    const [packages] = await db.query(query, [gig_id]);
 
+    res.status(200).json(packages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch packages' });
+  }
+});
+
+app.get('/api/get_package/:package_id', async (req, res) => {
+  const {package_id} = req.params;
+
+  try {
+    const query = `
+      SELECT * FROM gig_package
+      WHERE id = ?
+    `
+
+    const [package] = await db.query(query, [package_id]);
+
+    res.json({message: "", package})
+  } catch (error) {
+    
+  }
+})
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
