@@ -26,7 +26,7 @@ function Page() {
     const fetchExpertise = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/get_expertises/all");
-        setExpertiseOptions(res.data.expertise);
+        setExpertiseOptions(res.data.expertises);
       } catch (error) {
         console.error("Error fetching expertise:", error);
       }

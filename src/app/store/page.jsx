@@ -11,12 +11,13 @@ import React, { useEffect, useState } from 'react';
 function Page() {
     const { currentUser } = useUser();
     const [products, setProducts] = useState([]);
+    const [nameSearch, setNameSearch] = useState('all');
 
     useEffect(() => {
 
         const fetchData = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/get_product");
+                const res = await axios.get(`http://localhost:5000/api/get_product/${nameSearch}`);
                 setProducts(res.data.products);
             } catch (error) {
                 console.log("Error fetch product data", error);
@@ -24,7 +25,7 @@ function Page() {
         }
 
         fetchData();
-    }, []);
+    }, [nameSearch]);
 
     const [isClient, setIsClient] = useState(false)
 

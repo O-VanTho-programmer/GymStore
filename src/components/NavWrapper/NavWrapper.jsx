@@ -12,7 +12,7 @@ function NavWrapper() {
         "/login", "/sign_up",
 
     ];
-    const shouldHideNav = noNavPaths.includes(pathname) || pathname.startsWith('/store') || pathname.startsWith('/admin') ;
+    const shouldHideNav = noNavPaths.includes(pathname) || pathname.startsWith('/store') || pathname.startsWith('/admin') || pathname.startsWith('/calculate_tool') || pathname.startsWith('/cart') ;
 
     return !shouldHideNav ? <Navar /> : null;
 }

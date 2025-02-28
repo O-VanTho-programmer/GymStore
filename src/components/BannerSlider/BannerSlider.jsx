@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import styles from './BannerSlider.module.css';
 import StyledBTN from '../StyledBTN/StyledBTN';
 
 function BannerSlider({ image_url, title, span_btn, link }) {

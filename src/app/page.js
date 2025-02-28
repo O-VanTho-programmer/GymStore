@@ -75,7 +75,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Section 3 */}
+        {/* Section 3
         <div className='flex flex-col md:flex-row mb-12 max-w-[1140px] text-start items-center bg-white shadow-lg rounded-lg overflow-hidden'>
           <div className='flex-1 p-5 text-start'>
             <h2 className='mb-4 text-black'>Gamify Workout</h2>
@@ -93,7 +93,7 @@ const HomePage = () => {
           >
             <img src='/gamifyWorkout.jpg' className='w-full h-auto object-cover rounded-lg shadow-lg' />
           </motion.div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

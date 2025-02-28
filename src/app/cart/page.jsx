@@ -103,7 +103,7 @@ function Page() {
         <a href='/store' className='text-base mt-10 text-gray-600 flex items-center'> <IoIosArrowRoundBack />Back to store</a>
       </div>
 
-      <div className='w-full md:w-1/3 p-4 bg-gray-100 rounded shadow-md'>
+      <div className='w-full md:w-1/3 p-4 bg-white rounded shadow-md'>
         <h1 className='text-xl font-bold mb-4'>Summary</h1>
 
         <div className='flex justify-between mb-4'>

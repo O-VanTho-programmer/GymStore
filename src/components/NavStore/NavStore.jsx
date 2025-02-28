@@ -70,8 +70,7 @@ function NavStore() {
                         {/* Dropdown Menu */}
                         {isDropdownOpen && (
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 text-gray-700 z-20">
-                                <a href={currentUser ? "/world" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100 text-orange-600">Find Gymbro</a>
-                                <a href={currentUser ? "/hire_pt" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Hire PT</a>
+                                <a href={currentUser ? "/find_pt" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100 text-orange-600">Hire PT</a>
                                 <a href={currentUser ? "/find_clients" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Find Clients</a>
                                 <a href={currentUser ? "/my_profile" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
                                 <a href={currentUser ? "/settings" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
@@ -98,7 +97,7 @@ function NavStore() {
                     <ul className="flex flex-col space-y-4 text-black py-3">
                         <li><a href="/category" className="block px-4 py-2 hover:text-[#f36100]">category</a></li>
                         <li><a href="/goals" className="block px-4 py-2 hover:text-[#f36100]">Goals & Demand</a></li>
-                        <li><a href="/calculate" className="block px-4 py-2 hover:text-[#f36100]">Calculate Tool</a></li>
+                        <li><button className="block px-4 py-2 hover:text-[#f36100]">Calculate Tool</button></li>
                         {!currentUser && (
                             <li><a href="/login" className="block px-4 py-2 hover:text-[#f36100]">Login</a></li>
                         )}
@@ -134,14 +133,13 @@ function NavStore() {
                 </li>
 
                 <li className="relative group">
-                    <a href="/calculate" className="flex items-center gap-1 border-b-2 border-transparent hover:text-[#f36100] hover:border-[#f36100] py-2">
+                    <button className="flex items-center gap-1 border-b-2 border-transparent hover:text-[#f36100] hover:border-[#f36100] py-2">
                         Calculate Tool
                         <IoIosArrowDown />
-                    </a>
+                    </button>
                     <div className="z-10 absolute left-0 hidden space-y-2 bg-white text-black shadow-lg group-hover:block">
-                        <a href="/calculate/bmi" className="block px-4 py-2 text-sm hover:bg-gray-100">BMI Calculator</a>
-                        <a href="/calculate/calorie" className="block px-4 py-2 text-sm hover:bg-gray-100">Calorie Calculator</a>
-                        <a href="/calculate/macros" className="block px-4 py-2 text-sm hover:bg-gray-100">Macros Calculator</a>
+                        <a href="/calculate_tool/cal_bmi" className="block px-4 py-2 text-sm hover:bg-gray-100">BMI Calculator</a>
+                        <a href="/calculate_tool/cal_tdee" className="block px-4 py-2 text-sm hover:bg-gray-100">TDEE Calculator</a>
                     </div>
                 </li>
 

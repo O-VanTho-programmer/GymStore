@@ -5,7 +5,7 @@ function FitGig({ gig, profile }) {
     return (
         <a href = {`/find_pt/fit_gig/${gig.id}`} className='flex flex-col gap-2'>
             <div className='min-w-[260px] min-h-[145px] relative text-black overflow-hidden rounded'>
-                <img src={gig.image_url} className='absolute object-cover w-full h-full'  />
+                <img src={gig.image_url} className='absolute object-fill w-full h-full'/>
             </div>
 
             <div className='flex items-center justify-between'>
@@ -24,7 +24,7 @@ function FitGig({ gig, profile }) {
                 <span className='numReview text-gray-500'>({gig.numReviews})</span>
             </div>
 
-            <span className='font-bold'>From {gig?.price || 50.000} vnd {gig?.unit || "Day"}</span>
+            <span className='font-semibold text-lg'>From {gig?.price || 50.000} vnd {gig?.unit || "/Day"}</span>
         </a>
     )
 }

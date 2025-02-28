@@ -247,7 +247,9 @@ app.get('/api/get_product_item/:id', async (req, res) => {
 });
 
 
-app.get('/api/get_product', async (req, res) => {
+app.get('/api/get_product/:name', async (req, res) => {
+  const {name} = req.params;
+
   try {
     const query = `
         SELECT 
@@ -264,10 +266,13 @@ app.get('/api/get_product', async (req, res) => {
     LEFT JOIN product_image pi ON p.id = pi.product_id
     LEFT JOIN product_flavour pf ON p.id = pf.product_id  
     LEFT JOIN flavour f ON pf.flavour_id = f.id  
+    ${name !== 'all' ? "WHERE p.name LIKE '%?%' OR p.description LIKE '%?%'" : ""}
     GROUP BY p.id;
     `;
 
-    const [products] = await db.query(query);
+    const [products] = name !== 'all'
+      ? await db.query(query, [name])
+      : await db.query(query);
 
     products.forEach(p => {
       p.sell_price = p.sell_price.toLocaleString('vi-VN') + '₫';
@@ -656,74 +661,74 @@ app.get('/api/get_profile_review/:profileId', async (req, res) => {
   }
 })
 
-app.get('/api/get_user_profile/:name_path', async (req, res) => {
-  const { name_path } = req.params;
+// app.get('/api/get_user_profile/:name_path', async (req, res) => {
+//   const { name_path } = req.params;
 
-  try {
-    const queryUser = `SELECT userId FROM user WHERE name_path = ?`;
-    const [user] = await db.query(queryUser, [name_path]);
+//   try {
+//     const queryUser = `SELECT userId FROM user WHERE name_path = ?`;
+//     const [user] = await db.query(queryUser, [name_path]);
 
-    if (user.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+//     if (user.length === 0) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
 
-    const userId = user[0].userId;
+//     const userId = user[0].userId;
 
-    const queryProfile = `
-      SELECT 
-        p.*,
-       u.username,
-    u.is_personal_trainer,
-    u.avatar,
-    COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
-  FROM profile p
-  JOIN user u ON u.userId = p.user_id
-  LEFT JOIN fit_gigs g ON g.profile_id = p.id
-  LEFT JOIN gig_review gr ON gr.gig_id = g.id
-  WHERE p.user_id = ?
-  GROUP BY p.id
-`;
+//     const queryProfile = `
+//       SELECT 
+//         p.*,
+//         u.username,
+//         u.is_personal_trainer,
+//         u.avatar,
+//         COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+//       FROM profile p
+//       JOIN user u ON u.userId = p.user_id
+//       LEFT JOIN fit_gigs g ON g.profile_id = p.id
+//       LEFT JOIN gig_review gr ON gr.gig_id = g.id
+//       WHERE p.user_id = ?
+//       GROUP BY p.id
+//     `;
 
-    const [profileRows] = await db.query(queryProfile, [userId]);
+//     const [profileRows] = await db.query(queryProfile, [userId]);
 
-    if (profileRows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
+//     if (profileRows.length === 0) {
+//       return res.status(404).json({ error: 'Profile not found' });
+//     }
 
-    const profile = profileRows[0];
+//     const profile = profileRows[0];
 
-    const queryExpertise = `
-      SELECT e.id AS expertise_id, e.expertise
-      FROM pt_expertise pe
-      JOIN expertise e ON e.id = pe.expertise_id
-      WHERE pe.profile_id = ?
-    `;
+//     const queryExpertise = `
+//       SELECT e.id AS expertise_id, e.expertise
+//       FROM pt_expertise pe
+//       JOIN expertise e ON e.id = pe.expertise_id
+//       WHERE pe.profile_id = ?
+//     `;
 
-    const [expertiseRows] = await db.query(queryExpertise, [profile.id]);
+//     const [expertiseRows] = await db.query(queryExpertise, [profile.id]);
 
-    profile.expertise_list = expertiseRows.map((row) => ({
-      id: row.expertise_id,
-      expertise: row.expertise,
-    }));
+//     profile.expertise_list = expertiseRows.map((row) => ({
+//       id: row.expertise_id,
+//       expertise: row.expertise,
+//     }));
 
 
-    const queryGig = `
-      SELECT g.*, 
-        COUNT(gr.id) AS numReviews, 
-        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
-      FROM fit_gigs g
-      LEFT JOIN gig_review gr ON gr.gig_id = g.id
-      WHERE g.profile_id = ?
-      GROUP BY g.id
-    `;
+//     const queryGig = `
+//       SELECT g.*, 
+//         COUNT(gr.id) AS numReviews, 
+//         COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+//       FROM fit_gigs g
+//       LEFT JOIN gig_review gr ON gr.gig_id = g.id
+//       WHERE g.profile_id = ?
+//       GROUP BY g.id
+//     `;
 
-    const [gigs] = await db.query(queryGig, [profile.id]);
-    res.json({ profile, gigs });
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    res.status(500).json({ error: "Failed to fetch profile" });
-  }
-});
+//     const [gigs] = await db.query(queryGig, [profile.id]);
+//     res.json({ profile, gigs });
+//   } catch (error) {
+//     console.error("Error fetching profile:", error);
+//     res.status(500).json({ error: "Failed to fetch profile" });
+//   }
+// });
 
 
 app.get('/api/get_my_profile/:userId', async (req, res) => {
@@ -785,6 +790,50 @@ app.get('/api/get_my_profile/:userId', async (req, res) => {
   }
 })
 
+app.get('/api/get_gigs_by_expetise/:expertise_id', async (req, res) => {
+  const { expertise_id } = req.params;
+
+  try {
+    const queryGigs = `
+      SELECT g.*, 
+        COUNT(gr.id) AS numReviews, 
+        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM fit_gigs g
+      LEFT JOIN gig_review gr ON gr.gig_id = g.id
+      ${expertise_id !== 'all' ? 'WHERE g.expertise_id = ?' : ''}
+      GROUP BY g.id
+    `;
+
+    const [gigs] = expertise_id !== 'all'
+      ? await db.query(queryGigs, [expertise_id])
+      : await db.query(queryGigs);
+
+    const queryProfile = `
+      SELECT 
+        p.*,
+        u.username,
+        u.is_personal_trainer,
+        u.avatar
+      FROM profile p
+      JOIN user u ON u.userId = p.user_id
+      WHERE p.id = ?
+      LIMIT 1
+    `;
+
+    const gigsAndProfile = await Promise.all(
+      gigs.map(async (gig) => {
+        const [profile] = await db.query(queryProfile, [gig.profile_id]);
+        return { gig, profile: profile[0] };
+      })
+    );
+
+    res.json({ gigsAndProfile });
+  } catch (error) {
+    console.error("Error fetching gigs:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
+
 // Edit my profile
 app.post('/api/edit_about_me', async (req, res) => {
   const { profileId, content } = req.body;
@@ -814,8 +863,8 @@ app.get(`/api/get_expertises/:profileId`, async (req, res) => {
   try {
     if (profileId === 'all') {
       const query = `SELECT * FROM expertise`;
-      const [expertise] = await db.query(query);
-      return res.json({ expertise });
+      const [expertises] = await db.query(query);
+      return res.json({ expertises });
     } else {
       const query = `
         SELECT e.* 
@@ -833,7 +882,6 @@ app.get(`/api/get_expertises/:profileId`, async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 app.post('/api/edit_expertise', async (req, res) => {
   const { expertises, profileId } = req.body;
@@ -896,6 +944,9 @@ app.post('/api/create_gig', upload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'Database insertion failed' });
   }
 })
+
+// Searching'
+
 // Package of gig
 app.get('/api/get_packages/:gig_id', async (req, res) => {
   const { gig_id } = req.params;
@@ -912,7 +963,7 @@ app.get('/api/get_packages/:gig_id', async (req, res) => {
 });
 
 app.get('/api/get_package/:package_id', async (req, res) => {
-  const {package_id} = req.params;
+  const { package_id } = req.params;
 
   try {
     const query = `
@@ -922,9 +973,9 @@ app.get('/api/get_package/:package_id', async (req, res) => {
 
     const [package] = await db.query(query, [package_id]);
 
-    res.json({message: "", package})
+    res.json({ message: "", package })
   } catch (error) {
-    
+
   }
 })
 

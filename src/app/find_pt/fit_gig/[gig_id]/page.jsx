@@ -24,8 +24,6 @@ function FitGigDetails() {
             try {
                 const res = await axios.get(`http://localhost:5000/api/get_user_gig_detail/${gig_id}`);
 
-                console.log(res.data.profile)
-                console.log(res.data.gig)
                 setProfile(res.data.profile);
                 setGig(res.data.gig);
             } catch (error) {
