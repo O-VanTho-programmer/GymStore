@@ -6,12 +6,17 @@ import orderQuantityFetch from '@/utils/getNumberOfOrderedProduct';
 import { IoIosArrowRoundBack } from "react-icons/io";
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import ErrorInformMessage from '@/components/ErrorInformMessage/ErrorInformMessage';
 
 function Page() {
   const { currentUser } = useUser();
   const [orderQuantity, setOrderQuantity] = useState(0);
   const [orderedProducts, setOrderedProducts] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [errorMess, setErrorMess] = useState('');
+  const [addresses, setAddresses] = useState([]);
+  const [inputAddress, setInputAddress] = useState('');
+  const [isCustomeAddress, setIsCustomeAddress] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -19,22 +24,38 @@ function Page() {
         const orderQuantity = await orderQuantityFetch(currentUser.userId);
         setOrderQuantity(orderQuantity);
       };
-
       fetchQuantity();
+
+      const fetchData = async () => {
+        try {
+          const res = await axios.post(`http://localhost:5000/api/get_order_detail/`, { userId: currentUser.userId });
+          setOrderedProducts(res.data.orderDetails);
+          setTotalPrice(res.data.totalPrice);
+        } catch (error) {
+          console.log("Error fetching order details");
+        }
+      };
+      fetchData();
+
+      const fetcUserAddress = async () => {
+        try {
+          const res = await axios.get(`http://localhost:5000/api/get_user_address/${currentUser.userId}`)
+          setAddresses(res.data.addresses);
+        } catch (error) {
+
+        }
+      }
+
+      fetcUserAddress();
     }
 
-    const fetchData = async () => {
-      try {
-        const res = await axios.post(`http://localhost:5000/api/get_order_detail/`, { userId: currentUser.userId });
-        setOrderedProducts(res.data.orderDetails);
-        setTotalPrice(res.data.totalPrice);
-      } catch (error) {
-        console.log("Error fetching order details");
-      }
-    };
-
-    fetchData();
   }, [currentUser]);
+
+  const showMessage = (message) => {
+    setErrorMess(message);
+
+    setTimeout(() => setErrorMess(''), 1000);
+  }
 
   const updateQuantityDB = async ({ newQuantity, productId, orderId }) => {
     try {
@@ -47,21 +68,34 @@ function Page() {
       if (res.data.success) {
         window.location.reload();
       } else {
-        console.error("Failed to update quantity:", res.data.message);
+        showMessage(res.data.message);
       }
     } catch (error) {
       console.error("Error updating quantity in DB:", error);
     }
   }
 
-  const deleteItem = async ({productId, orderId}) => {
+  const deleteItem = async ({ productId, orderId }) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/delete_ordered_product',{
+      const res = await axios.post('http://localhost:5000/api/delete_ordered_product', {
         productId,
         orderId
       })
+
+      window.location.reload();
     } catch (error) {
-      
+
+    }
+  }
+
+  const handlePurchase = async () => {
+    try {
+      const res = await axios.post(`http://localhost:5000/api/purchase`, {
+        userId: currentUser.userId,
+        address: inputAddress
+      })
+    } catch (error) {
+
     }
   }
 
@@ -95,12 +129,12 @@ function Page() {
                 })}
               />
               <p className='ml-5 font-semibold'>{od.total_price_per}</p>
-              <IoMdClose onClick={() => deleteItem({productId: od.product_id, orderId: od.order_id})} className='cursor-pointer justify-self-end ml-5' size={18} />
+              <IoMdClose onClick={() => deleteItem({ productId: od.product_id, orderId: od.order_id })} className='cursor-pointer justify-self-end ml-5' size={18} />
             </div>
           ))}
         </div>
 
-        <a href='/store' className='text-base mt-10 text-gray-600 flex items-center'> <IoIosArrowRoundBack />Back to store</a>
+        <a href='/store' className='text-lg mt-10 text-gray-600 flex items-center'> <IoIosArrowRoundBack />Back to store</a>
       </div>
 
       <div className='w-full md:w-1/3 p-4 bg-white rounded shadow-md'>
@@ -114,9 +148,36 @@ function Page() {
         <label className='block mb-4'>
           <div className='flex justify-between'>
             <span className='block text-sm font-medium'>SHIPPING</span>
-            <span>VND</span>
+            <span>0 VND</span>
           </div>
-          <select className='mt-1 block w-full p-2 border rounded'>
+
+          <div className='mt-2'>
+            <label className='block mb-2'>
+              <input
+                type='checkbox'
+                checked={isCustomeAddress}
+                onChange={() => setIsCustomeAddress(!isCustomeAddress)}
+                className='mr-2'
+              />
+              Use custom address
+            </label>
+            {!isCustomeAddress ? (
+              <select onChange={(e) => setInputAddress(e.target.value)} className='w-full p-2 border rounded'>
+                {addresses?.map((a, i) => (
+                  <option key={i} value={a}>{a}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                name='address'
+                placeholder='Enter your address'
+                className='w-full p-2 border rounded mt-2'
+                onChange={(e) => setInputAddress(e.target.value)}
+              />
+            )}
+          </div>
+
+          <select className='mt-4 block w-full p-2 border rounded'>
             <option defaultChecked value={'COD'}>Cash On Delivery</option>
           </select>
         </label>
@@ -134,10 +195,14 @@ function Page() {
           <span className='text-[#f36100]'>{totalPrice}</span>
         </div>
 
-        <button className='w-full p-4 bg-[#f36100] text-white font-bold rounded hover:bg-[#d94e00]'>
+        <button onClick={handlePurchase} className='w-full p-4 bg-[#f36100] text-white font-bold rounded hover:bg-[#d94e00]'>
           CHECKOUT
         </button>
       </div>
+
+      {errorMess && (
+        <ErrorInformMessage message={errorMess} />
+      )}
     </div>
   );
 }

@@ -5,6 +5,8 @@ const addCart = async ({productId, userId, quantity}) => {
         const res = await axios.post('http://localhost:5000/api/add_cart', {
             productId, userId, quantity
         });
+
+        return res.data;
     } catch (error) {
         console.error("Error adding product to cart:", error);
     }

@@ -11,6 +11,7 @@ function page() {
     const { gig_id, package_id } = useParams();
     const [passedStep, setPassedStep] = useState(1);
     const [option, setOption] = useState(1);
+    const [profile, setProfile] = useState([]);
     const [gig, setGig] = useState([]);
     const [selectedPackage, setSelectedPackage] = useState([]);
 
@@ -19,6 +20,14 @@ function page() {
             try {
                 const resGig = await axios.get(`http://localhost:5000/api/get_user_gig_detail/${gig_id}`);
                 const resPackage = await axios.get(`http://localhost:5000/api/get_package/${package_id}`);
+
+                console.log(resGig.data.profile);
+                console.log(resGig.data.gig)
+                console.log(resPackage.data.package[0])
+
+                setProfile(resGig.data.profile)
+                setGig(resGig.data.gig)
+                setSelectedPackage(resPackage.data.package[0])
             } catch (error) {
 
             }
@@ -90,44 +99,30 @@ function page() {
             {/* Order Summary Section */}
             <div className="w-1/3 bg-white p-8 rounded-lg shadow-lg">
                 <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-4 mb-4">
                     <img
-                        src="/path/to/image.jpg"
+                        src={gig.image_url}
                         alt="Gig Thumbnail"
-                        className="w-16 h-16 rounded-md"
+                        className="w-[165px] h-[125px] rounded-md"
                     />
-                    <div>
-                        <p className="font-medium">do b2b lead generation, email address by using LinkedIn</p>
-                        <p className="text-gray-500 text-sm">Basic - US$15</p>
-                    </div>
+                    <p className="line-clamp-5">{gig.description}</p>
                 </div>
-                <ul className="text-sm space-y-1 mb-4">
-                    <li className="flex items-center gap-2">
-                        <IoIosCheckmarkCircle className="text-green-600" /> 50 leads included
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <IoIosCheckmarkCircle className="text-green-600" /> 4 hours of work
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <IoIosCheckmarkCircle className="text-green-600" /> Formatting & clean-up
-                    </li>
-                </ul>
+                <div className='flex flex-col'>
+                    <p className="font-medium">{gig.title}</p>
+                    <p className="text-gray-500">{selectedPackage.title} - {selectedPackage.price} vnd</p>
+                </div>
+                <p className='whitespace-pre-line py-4'>
+                    {selectedPackage.description}
+                </p>
                 <div className="border-t pt-4">
-                    <div className="flex justify-between text-sm">
-                        <span>Service fee</span>
-                        <span>US$3.83</span>
-                    </div>
                     <div className="flex justify-between text-lg font-semibold mt-2">
                         <span>Total</span>
-                        <span>US$18.83</span>
+                        <span>{selectedPackage.price}</span>
                     </div>
-                    <p className="text-gray-500 text-sm mt-2">Total delivery time: 2 days</p>
                     <button className="w-full bg-black text-white py-3 rounded-lg mt-4 font-medium hover:bg-gray-800">
                         Confirm & Pay
                     </button>
-                    <div className="flex items-center justify-center text-gray-500 text-sm mt-3">
-                        <MdOutlineLock className="mr-1" /> SSL Secure Payment
-                    </div>
+                    
                 </div>
             </div>
         </div>

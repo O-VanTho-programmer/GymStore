@@ -39,7 +39,7 @@ function page() {
     <div className="flex flex-col md:flex-row justify-between py-5 px-8 gap-6 bg-gray-100 min-h-screen">
       <div className="flex flex-col gap-6 bg-white p-6 rounded-lg shadow-md w-full md:w-1/3 max-w-[320px]">
         <div className="flex flex-col items-center">
-          <Avata width={100} height={100} image={profile.avatar} />
+          <Avata width={100} height={100} image={profile?.avatar || '/guest_avatar.png'} />
           <h3 className="font-bold text-2xl mt-4">{profile.username}</h3>
           {profile.is_personal_trainer && (
             <h3 className="role font-semibold text-lg text-gray-500">| Personal Trainer |</h3>

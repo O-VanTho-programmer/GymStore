@@ -7,8 +7,8 @@ const Navar = () => {
             <a className="navbar-logo" href='/'>
                 <img src="/logo.png" alt="Logo" />
             </a>
-            <ul className="flex gap-2">
-                <li><a className={styles.nav_links} href="#home">Home</a></li>
+            <ul className="flex gap-2 items-center text-sm md:text-base font-semibold">
+                <li><a className={styles.nav_links} href="/">Home</a></li>
                 <li><a className={styles.nav_links} href="#services">Services</a></li>
                 <li><a className={styles.nav_links} href="/find_pt">Hire PT</a></li>
                 <li><a className={styles.nav_links} href="/store">Store</a></li>

@@ -6,14 +6,21 @@ import Rating from "../Rating/Rating";
 import ButtonNumber from "../ButtonNumber/ButtonNumber";
 import axios from "axios";
 import addCart from "@/utils/addCart";
+import InformMessage from "../InformMessage/InformMessage";
+import { useQuantityOrder } from "@/context/QuantityOrderProvider";
+import ErrorInformMessage from "../ErrorInformMessage/ErrorInformMessage";
 
 export default function ProductItem({ id, user, rating }) {
+    const { orderQuantity, setOrderQuantity } = useQuantityOrder();
     const [product, setProduct] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
     const [size, setSize] = useState([]);
     const [flavour, setFlavour] = useState([]);
     const [quantity, setQuantity] = useState(1);
+    const [message, setMessage] = useState('');
+    const [errorMess, setErrorMess] = useState("");
+    const [pending, setPending] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -31,23 +38,47 @@ export default function ProductItem({ id, user, rating }) {
         return <p>Loading...</p>;
     }
 
+    const handleChangeQuantity = (newQuantity) => {
+        if (newQuantity > 0) {
+            setQuantity(newQuantity);
+        }
+    }
+
     const handleImageSelect = (image, index) => {
         setSelectedImage(image);
         setSelectedIndex(index);
     };
 
-    const handleAddCart = async () => {
-        addCart({productId: id, userId: user.userId, quantity});
+    const showMessage = (message) => {
+        setMessage(message);
+        setPending(true);
+
+        setTimeout(() => {
+            setMessage('');
+            setPending(false);
+        }, 1000);
     }
 
-    const handleBuyNow = async () => {
+    const showErrorMessage = (message) => {
+        setErrorMess(message);
+        setTimeout(() => setErrorMess(""), 1000);
+    }
+
+    const handleAddCart = async () => {
+        setPending(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/buy_now", {
-                productId: id,
-                userId: user.id
-            })
-        } catch (error) {
             
+            const result = await addCart({ productId: id, userId: user.userId, quantity });
+
+            if (result.success) {
+                showMessage("Item added into Cart");
+            } else {
+                showErrorMessage(result.message || "Failed to add item");
+            }
+        } catch (error) {
+            showErrorMessage("Item cannot be added");
+        } finally {
+            setPending(false);
         }
     }
 
@@ -128,18 +159,18 @@ export default function ProductItem({ id, user, rating }) {
 
                 <label className="flex gap-5 items-center text-gray-800">
                     Quantity:
-                    <ButtonNumber quantity={quantity} setQuantity={setQuantity} />
+                    <ButtonNumber quantity={quantity} setQuantity={handleChangeQuantity} />
                 </label>
 
                 <div className="flex flex-col gap-2 mt-4">
-                    <button className="bg-orange-500 text-white py-2 px-6 rounded hover:bg-orange-600 transition duration-300">
-                        Buy Now
-                    </button>
-                    <button onClick={handleAddCart} className="bg-gray-200 text-gray-800 py-2 px-6 rounded hover:bg-gray-300 transition duration-300">
+                    <button onClick={handleAddCart} disabled={pending} className="bg-orange-500 text-white py-2 px-6 rounded hover:bg-orange-600 transition duration-300">
                         Add to Cart
                     </button>
                 </div>
             </div>
+
+            {message && <InformMessage message={message} />}
+            {errorMess && <ErrorInformMessage message={errorMess} />}
         </div>
     );
 }

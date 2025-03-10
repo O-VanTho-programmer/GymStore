@@ -23,7 +23,7 @@ function FitGigDetails() {
         const fetchData = async () => {
             try {
                 const res = await axios.get(`http://localhost:5000/api/get_user_gig_detail/${gig_id}`);
-
+                console.log(res.data.profile);
                 setProfile(res.data.profile);
                 setGig(res.data.gig);
             } catch (error) {
@@ -92,14 +92,14 @@ function FitGigDetails() {
 
                 <div className='flex flex-col lg:flex-row items-center gap-4'>
                     <img src={profile?.avatar || '/guest_avatar.png'} className='border border-gray-200 w-[120px] h-[120px] rounded-full' />
-                    <div className='flex flex-col gap-2'>
+                    <div className='flex flex-col items-start gap-2'>
                         <h3 className='text-xl font-semibold'>{profile.username}</h3>
-                        <div className='flex items-center'>
+                        <div className='flex items-center gap-1'>
                             <Rating rating={profile.rating} />
                             <span>{profile.rating}</span>
                             <span>({gig.numReviews})</span>
                         </div>
-                        <button className='px-3 py-1 bg-white border border-gray-200 hover:bg-gray-400 text-black'>Contact Me</button>
+                        <button className='px-3 py-2 bg-white border border-gray-200 hover:bg-black hover:text-white text-black'>Contact Me</button>
                     </div>
                 </div>
 

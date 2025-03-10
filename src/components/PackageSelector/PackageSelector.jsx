@@ -16,7 +16,7 @@ export default function PackageSelector({ gigId }) {
         }, {});
 
         setPackages(packageData);
-        setSelectedPackage(Object.keys(packageData)[0]); // Default to first package
+        setSelectedPackage(Object.keys(packageData)[0]);
       } catch (error) {
         console.error('Error fetching packages:', error);
       }
@@ -28,6 +28,7 @@ export default function PackageSelector({ gigId }) {
   if (!selectedPackage || Object.keys(packages).length === 0) return <p>Loading packages...</p>;
 
   const currentPackage = packages[selectedPackage];
+  console.log(currentPackage)
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg w-full">
@@ -50,7 +51,7 @@ export default function PackageSelector({ gigId }) {
         <p className="whitespace-pre-line">{currentPackage.description}</p>
         <p className="text-sm font-medium mt-2">{currentPackage.extras}</p>
 
-        <button className="bg-black text-white w-full py-2 rounded mt-4 hover:bg-gray-600">
+        <button onClick={() => {window.location.href = `/payment/${gigId}/${currentPackage.id}`}} className=" bg-black text-white w-full py-2 rounded mt-4 hover:bg-gray-600">
           Continue →
         </button>
       </div>

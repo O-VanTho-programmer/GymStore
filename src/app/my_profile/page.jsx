@@ -31,7 +31,7 @@ function ProfilePage() {
     const showMessage = (message) => {
         setMessage(message);
 
-        setTimeout(() => setMessage(''), 3000);
+        setTimeout(() => setMessage(''), 1000);
     }
 
     useEffect(() => {
@@ -79,7 +79,7 @@ function ProfilePage() {
             {/* Left Sidebar - Profile Overview */}
             <div className='flex flex-col gap-6 bg-white p-6 rounded-lg shadow-md w-full md:w-1/3 max-w-[320px]'>
                 <div className='flex flex-col items-center'>
-                    <Avata width={100} height={100} src={profile.avatar ? profile.avatar : "/Avata.jpg"} />
+                    <Avata width={100} height={100} src={currentUser?.avatar || "/guest_avatar.png"} />
                     <h3 className='font-bold text-2xl mt-4'>{profile.username}</h3>
                     {profile.is_personal_trainer && (
                         <h3 className='role font-semibold text-lg text-gray-500'>{profile.is_personal_trainer ? "| Personal Trainer |" : "| Client |"}</h3>

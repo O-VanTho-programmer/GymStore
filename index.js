@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const upload = require('./src/utils/upload');
+const generatePurchaseExcel = require('./src/utils/generatePurchaseExcel');
 
 const app = express();
 app.use(cors()); // Enable CORS for all routes
@@ -64,18 +65,6 @@ db.connect((err) => {
   console.log('Connected to the database');
 });
 
-app.get('/api/products', (req, res) => {
-  const query = 'SELECT * FROM product';
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error executing query: ' + err.stack);
-      return res.status(500).json({ error: 'Database query failed' });
-    }
-    res.json(results);
-  });
-});
-// 
 // Authentication
 app.post('/api/sign_up', async (req, res) => {
   const { username, email, password } = req.body;
@@ -203,6 +192,26 @@ app.get('/api/get_category_detail/:category', async (req, res) => {
   }
 })
 
+// User
+app.get('/api/get_user_address/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `SELECT * FROM address WHERE user_id = ?`;
+    const [rows] = await db.query(query, [userId]);
+
+    const addresses = rows.map(r =>
+      `${r.City}, ${r.Province}, ${r.Street}`
+    );
+
+
+    res.status(200).json({ addresses });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch user address" });
+    console.log(error);
+  }
+})
+
 // Product
 app.get('/api/get_product_item/:id', async (req, res) => {
   const { id } = req.params;
@@ -210,6 +219,7 @@ app.get('/api/get_product_item/:id', async (req, res) => {
     const query = `
     SELECT 
         p.*, 
+        c.id AS category_id, 
         c.name AS category_name, 
         GROUP_CONCAT(DISTINCT pg.gender) AS genders, 
         GROUP_CONCAT(DISTINCT ps.size) AS sizes,
@@ -234,7 +244,6 @@ app.get('/api/get_product_item/:id', async (req, res) => {
 
     const product = rows[0];
 
-    product.sell_price = product.sell_price.toLocaleString('vi-VN') + '₫';
     product.genders = product.genders ? product.genders.split(",") : [];
     product.sizes = product.sizes ? product.sizes.split(",") : [];
     product.images = product.images ? product.images.split(",") : [];
@@ -248,7 +257,7 @@ app.get('/api/get_product_item/:id', async (req, res) => {
 
 
 app.get('/api/get_product/:name', async (req, res) => {
-  const {name} = req.params;
+  const { name } = req.params;
 
   try {
     const query = `
@@ -266,12 +275,14 @@ app.get('/api/get_product/:name', async (req, res) => {
     LEFT JOIN product_image pi ON p.id = pi.product_id
     LEFT JOIN product_flavour pf ON p.id = pf.product_id  
     LEFT JOIN flavour f ON pf.flavour_id = f.id  
-    ${name !== 'all' ? "WHERE p.name LIKE '%?%' OR p.description LIKE '%?%'" : ""}
+    ${name !== 'all' ? "WHERE p.stock_quantity > 0 AND (p.name LIKE ? OR p.description LIKE ?)" : "WHERE p.stock_quantity > 0"}
     GROUP BY p.id;
     `;
 
+    const searchTerm = `%${name}%`;
+
     const [products] = name !== 'all'
-      ? await db.query(query, [name])
+      ? await db.query(query, [searchTerm, searchTerm])
       : await db.query(query);
 
     products.forEach(p => {
@@ -304,7 +315,7 @@ app.get('/api/get_product_by_category/:categoryId', async (req, res) => {
           LEFT JOIN product_image pi ON p.id = pi.product_id
           LEFT JOIN product_flavour pf ON p.id = pf.product_id  
           LEFT JOIN flavour f ON pf.flavour_id = f.id  
-          WHERE p.category_id = ?
+          WHERE p.stock_quantity > 0 AND p.category_id = ?
           GROUP BY p.id;
       `;
 
@@ -347,7 +358,6 @@ app.post('/api/add_product', async (req, res) => {
       const queryGender = 'INSERT INTO product_gender (product_id, gender) VALUES (?, ?)';
       for (let g of gender) {
         await db.query(queryGender, [productId, g]);
-
       }
     }
 
@@ -420,15 +430,32 @@ app.post('/api/update_quantity_item', async (req, res) => {
   const { newQuantity, productId, orderId } = req.body;
 
   try {
-    const query = 'UPDATE orderdetail SET quantity = ? WHERE product_id = ? AND order_id = ?';
-    await db.query(query, [newQuantity, productId, orderId]);
+    const [product] = await db.query('SELECT stock_quantity FROM product WHERE id = ?', [productId]);
+    if (product.length === 0) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const stockQuantity = product[0].stock_quantity;
+
+    if (newQuantity > stockQuantity) {
+      return res.status(200).json({ success: false, message: "Product is out of stock" });
+    }
+
+    if (newQuantity === 0) {
+      await db.query('DELETE FROM orderdetail WHERE product_id = ? AND order_id = ?', [productId, orderId]);
+    } else {
+      await db.query('UPDATE orderdetail SET quantity = ? WHERE product_id = ? AND order_id = ?',
+        [newQuantity, productId, orderId]);
+    }
 
     res.status(200).json({ success: true, message: "Quantity updated successfully" });
+
   } catch (error) {
     console.error('Error updating quantity:', error);
     res.status(500).json({ success: false, message: "Server error while updating quantity" });
   }
-})
+});
+
 
 app.get('/api/get_order_quantity/:userId', async (req, res) => {
   const { userId } = req.params;
@@ -439,7 +466,7 @@ app.get('/api/get_order_quantity/:userId', async (req, res) => {
       SELECT SUM(od.quantity) AS total_products_orderd
       FROM  \`order\` o
       JOIN orderdetail od ON order_id = o.id
-      WHERE o.user_id = ?
+      WHERE o.user_id = ? AND o.status = 'Pending';
     `;
 
     const [result] = await db.query(query, [userId]);
@@ -456,14 +483,15 @@ app.post('/api/get_order_detail', async (req, res) => {
   try {
     const query = `
       SELECT 
-        od.*, 
-        (od.price * od.quantity) AS total_price_per,
+        od.*,
+        p.sell_price AS price,
+        (p.sell_price * od.quantity) AS total_price_per,
         p.name AS product_name,
         (SELECT pi.image_url FROM product_image AS pi WHERE pi.product_id = p.id LIMIT 1) AS product_image
       FROM \`order\` o
       JOIN orderdetail od ON od.order_id = o.id
       JOIN product p ON p.id = od.product_id
-      WHERE o.user_id = ?;
+      WHERE o.user_id = ? AND o.status = 'Pending';
     `;
 
     const [orderDetails] = await db.query(query, [userId]);
@@ -487,20 +515,36 @@ app.post('/api/add_cart', async (req, res) => {
   const { productId, userId, quantity } = req.body;
 
   try {
+    const [queryStockQuantity] = await db.query('SELECT stock_quantity FROM product WHERE id = ?', [productId]);
+    if (queryStockQuantity.length === 0) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    const stockQuantity = queryStockQuantity[0].stock_quantity;
+
+    if (quantity > stockQuantity) {
+      return res.status(400).json({ success: false, message: "Product is out of stock" });
+    }
+
     const [product] = await db.query("SELECT sell_price FROM product WHERE id = ?", [productId]);
     if (!product || product.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    const productPrice = product[0].sell_price;
 
-    const [userOrder] = await db.query("SELECT id FROM `order` WHERE user_id = ? LIMIT 1", [userId]);
+    let [userOrder] = await db.query("SELECT id FROM `order` WHERE user_id = ? AND status = 'Pending' LIMIT 1", [userId]);
+
+    if (userOrder.length === 0) {
+      const [insertResult] = await db.query("INSERT INTO `order` (user_id, status) VALUES (?, 'Pending')", [userId]);
+      userOrder = [{ id: insertResult.insertId }];
+    }
+
     const orderId = userOrder[0].id;
 
     const [orderDetail] = await db.query("SELECT quantity FROM orderdetail WHERE product_id = ? AND order_id = ?", [productId, orderId]);
 
     if (orderDetail.length === 0) {
-      await db.query("INSERT INTO orderdetail (product_id, order_id, price, quantity) VALUES (?, ?, ?, ?)",
-        [productId, orderId, productPrice, quantity]);
+      await db.query("INSERT INTO orderdetail (product_id, order_id, quantity) VALUES (?, ?, ?)",
+        [productId, orderId, quantity]);
     } else {
       await db.query("UPDATE orderdetail SET quantity = quantity + ? WHERE product_id = ? AND order_id = ?",
         [quantity, productId, orderId]);
@@ -514,13 +558,51 @@ app.post('/api/add_cart', async (req, res) => {
   }
 });
 
-app.post('/api/buy_now', async (req, res) => {
-  const { productId, userId, quantity } = req.body;
+app.post('/api/purchase', async (req, res) => {
+  const { userId, address } = req.body;
 
   try {
+    const queryOrderDetails = `
+      SELECT od.*, p.name AS product_name, p.id AS product_id,
+            (p.sell_price * od.quantity) AS total_price_per
+      FROM orderdetail od
+      JOIN \`order\` o ON od.order_id = o.id
+      JOIN product p ON od.product_id = p.id
+      WHERE  o.user_id = ? AND o.status = 'Pending';
+    `;
+    const [orderDetails] = await db.query(queryOrderDetails, [userId]);
 
+    const queryIncreaseSoldProduct = `
+      UPDATE product p
+      JOIN orderdetail od ON p.id = od.product_id
+      JOIN \`order\` o ON od.order_id = o.id
+      SET p.sold_quantity = p.sold_quantity + od.quantity
+      SET p.stock_quantity = p.stock_quantity - od.quantity
+      WHERE o.user_id = ? AND o.status = 'Pending';
+    `;
+    await db.query(queryIncreaseSoldProduct, [userId]);
+
+    const query = `
+      UPDATE \`order\` SET status = 'Delivering' WHERE user_id = ? AND status = 'Pending' ORDER BY create_date DESC LIMIT 1;
+    `;
+    await db.query(query, [userId]);
+
+    const purchaseDetails = [];
+    purchaseDetails.push({ 'userId': userId });
+    purchaseDetails.push({ 'address': address });
+    orderDetails.forEach(od => {
+      purchaseDetails.push({
+        product_id: od.product_id,
+        product_name: od.product_name,
+        quantity: od.quantity,
+        total_price_per: od.total_price_per
+      });
+    });
+    purchaseDetails.push({ 'total_price': orderDetails.reduce((sum, od) => sum + od.total_price_per, 0) });
+    const filePath = await generatePurchaseExcel(purchaseDetails);
+    res.json({ message: "Purchase successful", filePath });
   } catch (error) {
-
+    console.log(error);
   }
 })
 
@@ -568,18 +650,25 @@ app.get('/api/get_user_gig_detail/:gigId', async (req, res) => {
     if (gigRows.length === 0) {
       return res.status(404).json({ error: 'Gig not found' });
     }
-
     const gig = gigRows[0];
 
-    // Fetch expertise related to the profile
     const queryExpertise = `
       SELECT e.id AS expertise_id, e.expertise
       FROM pt_expertise pe
       JOIN expertise e ON pe.expertise_id = e.id
       WHERE pe.profile_id = ?
     `;
-
     const [expertiseRows] = await db.query(queryExpertise, [gig.profile_id]);
+
+    const queryRatingProfile = `
+      SELECT COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM gig_review gr
+      JOIN fit_gigs g ON gr.gig_id = g.id
+      JOIN profile p ON g.profile_id = p.id
+      WHERE p.id = ?
+    `
+
+    const [ratingProfile] = await db.query(queryRatingProfile, [gig.profile_id]);
 
     const profile = {
       id: gig.profile_id,
@@ -593,6 +682,7 @@ app.get('/api/get_user_gig_detail/:gigId', async (req, res) => {
         id: row.expertise_id,
         expertise: row.expertise,
       })),
+      rating: ratingProfile[0].rating,
     };
 
     const gigDetail = {
@@ -945,6 +1035,15 @@ app.post('/api/create_gig', upload.single('image'), async (req, res) => {
   }
 })
 
+app.post('/api/edit_profile', async (req, res) => {
+  const { userId, username, email, image } = req.body;
+
+  try {
+
+  } catch (error) {
+
+  }
+});
 // Searching'
 
 // Package of gig
@@ -952,7 +1051,7 @@ app.get('/api/get_packages/:gig_id', async (req, res) => {
   const { gig_id } = req.params;
 
   try {
-    const query = `SELECT title, description, price, duration FROM gig_package WHERE gig_id = ?`;
+    const query = `SELECT * FROM gig_package WHERE gig_id = ?`;
     const [packages] = await db.query(query, [gig_id]);
 
     res.status(200).json(packages);
@@ -979,6 +1078,201 @@ app.get('/api/get_package/:package_id', async (req, res) => {
   }
 })
 
+// Admin Dashboard
+app.get('/api/get_product_admin/:name', async (req, res) => {
+  const { name } = req.params;
+  try {
+    const query = `
+      SELECT 
+          p.id,
+          p.name,
+          p.stock_quantity,
+          p.cost_price,
+          p.sell_price,
+          p.sold_quantity,
+          c.name AS category_name
+      FROM product p
+      JOIN category c ON p.category_id = c.id
+      ${name !== 'all' ? "WHERE p.name LIKE ? OR p.description LIKE ?" : ""}
+      ORDER BY p.stock_quantity <= 10 DESC, p.update_at DESC;
+    `;
+
+    if (name === 'all') {
+      const [products] = await db.query(query);
+      return res.json({ products });
+    }
+
+    const searchTerm = `%${name}%`;
+    const [products] = await db.query(query, [searchTerm, searchTerm]);
+    res.json({ products });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+})
+
+app.post('/api/update_product', async (req, res) => {
+  const {
+    productId,
+    productName,
+    description,
+    sellPrice,
+    costPrice,
+    stock,
+    isSizeEnabled,
+    isGenderEnabled,
+    size,
+    gender,
+    category,
+    images
+  } = req.body;
+
+  try {
+    const query = `
+      UPDATE product
+      SET 
+        name = ?, 
+        description = ?, 
+        sell_price = ?, 
+        cost_price = ?, 
+        category_id = ?, 
+        stock_quantity = ?
+      WHERE id = ?;
+    `
+    await db.query(query, [productName, description, sellPrice, costPrice, category, stock, productId]);
+
+    await db.query('DELETE FROM product_image WHERE product_id = ?', [productId]);
+    await db.query('DELETE FROM product_size WHERE product_id = ?', [productId]);
+    await db.query('DELETE FROM product_gender WHERE product_id = ?', [productId]);
+
+    if (images && images.length > 0) {
+      const queryImg = 'INSERT INTO product_image (product_id, image_url) VALUES (?, ?)';
+      for (let img of images) {
+        await db.query(queryImg, [productId, img]);
+      }
+    }
+
+    if (isGenderEnabled) {
+      const queryGender = 'INSERT INTO product_gender (product_id, gender) VALUES (?, ?)';
+      for (let g of gender) {
+        await db.query(queryGender, [productId, g]);
+      }
+    }
+
+    if (isSizeEnabled) {
+      const querySize = 'INSERT INTO product_size (product_id, size) VALUES (?, ?)';
+      for (let s of size) {
+        await db.query(querySize, [productId, s]);
+      }
+    }
+
+    res.json({ message: "Update Product Susccessfully" });
+
+  } catch (error) {
+    console.log('Error', error)
+  }
+
+});
+
+app.get('/api/get_transaction', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        u.username,
+        p.name,
+        od.quantity,
+        (od.quantity * p.sell_price) AS price,
+        DATE_FORMAT(o.create_date, '%d/%m/%Y') AS create_date,
+        o.status
+      FROM \`order\` o
+      JOIN user u ON o.user_id = u.userId
+      JOIN orderdetail od ON o.id = od.order_id
+      JOIN product p ON od.product_id = p.id
+      ORDER BY o.create_date DESC;
+    `;
+
+    const [transactions] = await db.query(query);
+    res.json({ transactions });
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ error: "Failed to fetch transactions" });
+  }
+});
+
+app.get('/api/get_revenue_and_sold', async (req, res) => {
+  const { start_date, end_date } = req.query;
+
+  try {
+    const query = `
+      SELECT 
+        SUM(od.quantity) AS total_sold,
+        SUM(od.quantity * p.sell_price) AS total_revenue
+      FROM orderdetail od
+      JOIN product p ON od.product_id = p.id
+      JOIN \`order\` o ON o.id = od.order_id
+      WHERE o.create_date BETWEEN ? AND ?;
+    `;
+
+    const [result] = await db.query(query, [start_date, end_date]);
+    res.json({ total_sold: result[0].total_sold, total_revenue: result[0].total_revenue });
+  } catch (error) {
+    console.error("Error fetching revenue and sold:", error);
+    res.status(500).json({ error: "Failed to fetch revenue and sold" });
+  }
+});
+
+app.get('/api/get_trainer', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        u.userId, 
+        u.username, 
+        u.email, 
+        up.phone_number, 
+        COALESCE(GROUP_CONCAT(DISTINCT e.expertise SEPARATOR ', '), 'None') AS expertise, 
+        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM user u
+      LEFT JOIN user_numberphone up ON u.userId = up.user_id
+      JOIN profile p ON p.user_id = u.userId
+      JOIN pt_expertise pe ON pe.profile_id = p.id
+      LEFT JOIN expertise e ON e.id = pe.expertise_id
+      LEFT JOIN fit_gigs g ON g.profile_id = p.id
+      LEFT JOIN gig_review gr ON gr.gig_id = g.id
+      WHERE u.is_personal_trainer = 1
+      GROUP BY u.userId, u.username, u.email, up.phone_number;
+    `;
+    const [trainers] = await db.query(query);
+    res.json({ trainers });
+  } catch (error) {
+    console.error("Error fetching trainers:", error);
+    res.status(500).json({ error: "Failed to fetch trainers" });
+  }
+});
+
+app.get('/api/get_hired_clients/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const query = `
+      SELECT 
+        u.username, u.email, h.hire_date, h.due_date, COALESCE(ROUND(AVG(gr.rating), 1), 0) AS review
+      FROM user u
+      JOIN hire h ON h.client_id = u.userId
+      JOIN profile p ON p.user_id = ?
+      JOIN fit_gigs g ON g.profile_id = p.id
+      LEFT JOIN gig_review gr ON gr.user_id = u.userId AND gr.gig_id = g.id
+      WHERE h.trainer_id = ?
+      GROUP BY u.username, u.email, h.hire_date, h.due_date;
+    `;
+
+    const [clients] = await db.query(query, [trainerId, trainerId]);
+    res.json({ clients });
+  } catch (error) {
+    console.error("Error fetching hired clients:", error);
+    res.status(500).json({ error: "Failed to fetch hired clients" });
+  }
+});
+// 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

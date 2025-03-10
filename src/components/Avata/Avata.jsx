@@ -2,7 +2,7 @@ import React from 'react'
 
 function Avata({image_url, width, height}) {
     return (
-        <div style={{ width: `${width}px`, height: `${height}px` }} className="rounded-full overflow-hidden">
+        <div style={{ width: `${width}px`, height: `${height}px` }} className="rounded-full overflow-hidden bg-white">
             <img
                 src={image_url}
                 alt="Profile"

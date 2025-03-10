@@ -4,6 +4,8 @@ import FooterWrapper from "@/components/FooterWarpper/FooterWarpper";
 import NavStoreWrapper from "@/components/NavStoreWrapper/NavStoreWrapper";
 import { UserProvider } from "@/context/UserContext";
 import NavWrapper from "@/components/NavWrapper/NavWrapper";
+import { SearchProvider } from "@/context/SearchContext";
+import { QuantityOrderProvider } from "@/context/QuantityOrderProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,10 +20,14 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="relative">
         <UserProvider>
-          <NavWrapper />
-          <NavStoreWrapper />
-          {children}
-          <FooterWrapper />
+          <QuantityOrderProvider>
+            <SearchProvider>
+              <NavWrapper />
+              <NavStoreWrapper />
+              {children}
+              <FooterWrapper />
+            </SearchProvider>
+          </QuantityOrderProvider>
         </UserProvider>
       </body>
     </html>

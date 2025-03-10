@@ -1,24 +1,23 @@
 'use client'
 import Avata from '@/components/Avata/Avata';
+import { useUser } from '@/context/UserContext';
 import React, { useEffect, useState } from 'react';
 
 function page() {
+    const { currentUser } = useUser();
+
     const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
         setIsClient(true)
     }, [])
-    
-    const [displayName, setDisplayName] = useState('John Doe');
-    const [fullName, setFullName] = useState('John Doe');
-    const [email, setEmail] = useState('john.doe@example.com');
 
-    const handleDisplayNameChange = (e) => {
-        setDisplayName(e.target.value);
-    };
+    const [username, setUsername] = useState(currentUser?.username || 'Username');
+    const [email, setEmail] = useState(currentUser?.email || '@example.com');
+    const [image, setImage] = useState(null);
 
-    const handleFullNameChange = (e) => {
-        setFullName(e.target.value);
+    const handleUsernameChange = (e) => {
+        setUsername(e.target.value);
     };
 
     const handleEmailChange = (e) => {
@@ -28,7 +27,7 @@ function page() {
     const handleSubmit = (e) => {
         e.preventDefault();
         // Handle form submission logic here
-        console.log('Updated Name:', name);
+        console.log('Updated Name:', username);
         console.log('Updated Email:', email);
     };
 
@@ -42,8 +41,28 @@ function page() {
         setShowChangePassword(false);
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(URL.createObjectURL(file));
+        }
+    };
+
     const handleSaveNewPassword = async () => {
-        
+
+    }
+
+    const handleSave = async () => {
+        try {
+            const res = await axios.post('http://localhost:5000/api/edit_profile', {
+                userId: currentUser.userId,
+                username: username,
+                email: email,
+                image: image
+            });
+        } catch (error) {
+            console.log("Error when save ",error)
+        }
     }
 
     return (
@@ -57,27 +76,34 @@ function page() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
-                        <div className='flex justify-center'>
-                            <Avata width={150} height={150} />
+                        <div className='relative flex justify-center'>
+                            <div className='relative w-[150px] h-[150px]'>
+                                <Avata width={150} height={150} image_url={image || currentUser?.avatar || "/guest_avatar.png"} />
+
+                                <input
+                                    type='file'
+                                    accept='image/*'
+                                    className='hidden'
+                                    id='avatarInput'
+                                    onChange={handleImageChange}
+                                />
+
+                                <label htmlFor='avatarInput' className="absolute inset-0 bg-gray-600 bg-opacity-50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-300 cursor-pointer rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2-2L13.232 9.232m-4.536 5.536a2.5 2.5 0 103.536 3.536l7.071-7.071a2.5 2.5 0 00-3.536-3.536L9.232 14.768z" />
+                                    </svg>
+                                </label>
+                            </div>
                         </div>
 
                         <div className="mb-5">
                             <h2 className="border-b border-gray-300 pb-2 mb-5">Personal Information</h2>
                             <label className="block mb-2">
-                                Display Name:
+                                Username:
                                 <input
                                     type="text"
-                                    value={displayName}
-                                    onChange={handleDisplayNameChange}
-                                    className="w-full p-2 mt-1 border border-gray-300 rounded"
-                                />
-                            </label>
-                            <label className="block mb-2">
-                                Full Name:
-                                <input
-                                    type="text"
-                                    value={fullName}
-                                    onChange={handleFullNameChange}
+                                    value={username}
+                                    onChange={handleUsernameChange}
                                     className="w-full p-2 mt-1 border border-gray-300 rounded"
                                 />
                             </label>
@@ -93,13 +119,13 @@ function page() {
                         </div>
                         <div>
                             <h2 className="border-b border-gray-300 pb-2">Settings</h2>
-                            <button type="submit" className="px-4 py-2 mr-2 bg-blue-500 text-white rounded cursor-pointer">
+                            <button type="submit" className="px-4 py-2 mr-2 bg-gray-600 text-white rounded cursor-pointer">
                                 Save Changes
                             </button>
-                            <button type="button" onClick={handleChangePasswordClick} className="px-4 py-2 mr-2 bg-gray-500 text-white rounded cursor-pointer">
+                            <button type="button" onClick={handleChangePasswordClick} className="px-4 py-2 mr-2 bg-gray-600 text-white rounded cursor-pointer">
                                 Change Password
                             </button>
-                            <button type="button" className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer">
+                            <button type="button" className="px-4 py-2 bg-gray-600 text-white rounded cursor-pointer">
                                 Logout
                             </button>
                         </div>

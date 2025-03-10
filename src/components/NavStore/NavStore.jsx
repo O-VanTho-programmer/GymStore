@@ -6,6 +6,7 @@ import Avata from "../Avata/Avata";
 import { useUser } from "@/context/UserContext";
 import orderQuantityFetch from "@/utils/getNumberOfOrderedProduct";
 import { IoIosArrowDown } from "react-icons/io";
+import { useQuantityOrder } from "@/context/QuantityOrderProvider";
 
 function NavStore() {
 
@@ -13,7 +14,7 @@ function NavStore() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    const [orderQuantity, setOrderQuantity] = useState(0);
+    const {orderQuantity, setOrderQuantity} = useQuantityOrder();
 
     useEffect(() => {
         if (currentUser) {
@@ -24,7 +25,7 @@ function NavStore() {
 
             fetchQuantity();
         }
-    })
+    }, [])
 
     const handleLogout = () => {
         localStorage.removeItem("user");
@@ -60,7 +61,7 @@ function NavStore() {
                     {/* User Avatar Dropdown */}
                     <div className="relative hidden sm:block">
                         <button onClick={toggleDropdown} className="flex items-center space-x-3">
-                            <Avata image_url={"/Avata.jpg"} width={40} height={40} />
+                            <Avata image_url={currentUser?.avatar || "/guest_avatar.png"} width={40} height={40} />
                             <span className="text-white text-xl font-semibold">
                                 {currentUser ? currentUser.username : "Account"}
                             </span>
@@ -71,7 +72,7 @@ function NavStore() {
                         {isDropdownOpen && (
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 text-gray-700 z-20">
                                 <a href={currentUser ? "/find_pt" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100 text-orange-600">Hire PT</a>
-                                <a href={currentUser ? "/find_clients" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Find Clients</a>
+                                <a href={currentUser ? "/store" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Store</a>
                                 <a href={currentUser ? "/my_profile" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
                                 <a href={currentUser ? "/settings" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
                                 {currentUser?.isAdmin && (
@@ -96,7 +97,7 @@ function NavStore() {
                     <SearchBar />
                     <ul className="flex flex-col space-y-4 text-black py-3">
                         <li><a href="/category" className="block px-4 py-2 hover:text-[#f36100]">category</a></li>
-                        <li><a href="/goals" className="block px-4 py-2 hover:text-[#f36100]">Goals & Demand</a></li>
+                        {/* <li><a href="/goals" className="block px-4 py-2 hover:text-[#f36100]">Goals & Demand</a></li> */}
                         <li><button className="block px-4 py-2 hover:text-[#f36100]">Calculate Tool</button></li>
                         {!currentUser && (
                             <li><a href="/login" className="block px-4 py-2 hover:text-[#f36100]">Login</a></li>
@@ -120,7 +121,7 @@ function NavStore() {
                     </div>
                 </li>
 
-                <li className="relative group">
+                {/* <li className="relative group">
                     <a href="/goals" className="flex items-center gap-1 border-b-2 border-transparent hover:text-[#f36100] hover:border-[#f36100] py-2">
                         Goals & Demand
                         <IoIosArrowDown />
@@ -130,7 +131,7 @@ function NavStore() {
                         <a href="/goals/nutrition" className="block px-4 py-2 text-sm hover:bg-gray-100">Nutrition Goals</a>
                         <a href="/goals/mental-health" className="block px-4 py-2 text-sm hover:bg-gray-100">Mental Health</a>
                     </div>
-                </li>
+                </li> */}
 
                 <li className="relative group">
                     <button className="flex items-center gap-1 border-b-2 border-transparent hover:text-[#f36100] hover:border-[#f36100] py-2">

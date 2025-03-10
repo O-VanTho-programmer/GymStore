@@ -1,6 +1,6 @@
 import React from 'react'
 
-function PTClientServed() {
+function PTClientServed({client}) {
     return (
         <div className='flex-1 p-4 border border-gray-300 bg-white shadow-md rounded-md'>
             <h3 className='text-lg font-semibold mb-4'>Client Served</h3>

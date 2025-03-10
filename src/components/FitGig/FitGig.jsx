@@ -3,8 +3,8 @@ import { FaStar } from 'react-icons/fa'
 
 function FitGig({ gig, profile }) {
     return (
-        <a href = {`/find_pt/fit_gig/${gig.id}`} className='flex flex-col gap-2'>
-            <div className='min-w-[260px] min-h-[145px] relative text-black overflow-hidden rounded'>
+        <a href = {`/find_pt/fit_gig/${gig.id}`} className='flex flex-col gap-2 min-w-[255px] overflow-hidden p-2 bg-white rounded shadow-md transition-transform duration-300 transform hover:scale-105'>
+            <div className=' min-h-[150px] relative text-black overflow-hidden rounded'>
                 <img src={gig.image_url} className='absolute object-fill w-full h-full'/>
             </div>
 

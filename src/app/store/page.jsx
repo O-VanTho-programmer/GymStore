@@ -3,6 +3,7 @@
 import BannerSlider from '@/components/BannerSlider/BannerSlider';
 import Product from '@/components/Product/Product';
 import SubBanner from '@/components/SubBanner/SubBanner';
+import { useSearch } from '@/context/SearchContext';
 import { useUser } from '@/context/UserContext';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -10,8 +11,9 @@ import React, { useEffect, useState } from 'react';
 
 function Page() {
     const { currentUser } = useUser();
+    const { nameSearch, enteredSearch, setEnterSearch } = useSearch();
+
     const [products, setProducts] = useState([]);
-    const [nameSearch, setNameSearch] = useState('all');
 
     useEffect(() => {
 
@@ -21,11 +23,16 @@ function Page() {
                 setProducts(res.data.products);
             } catch (error) {
                 console.log("Error fetch product data", error);
+            } finally {
+                setEnterSearch(false);
             }
         }
+        if (enteredSearch) {
+            fetchData();
+        }
 
-        fetchData();
-    }, [nameSearch]);
+
+    }, [enteredSearch]);
 
     const [isClient, setIsClient] = useState(false)
 
@@ -56,7 +63,7 @@ function Page() {
                     </div>
                 </div>
 
-                <div className='w-full product_container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 px-28 py-10'>
+                <div className='w-full product_container grid grid-cols-2 sm:grid-cols-3  lg:grid-cols-4 xl:grid-cols-5 gap-4 p-1 sm:px-5 md:px-10 py-10'>
                     {products.map((p) => (
                         <Product key={p.id} user={currentUser} productId={p.id} image_url={p.images.split(',')[0]} link={`store/product/${p.id}`} price={p.sell_price} product_name={p.name} rating={p.rating} />
                     ))}

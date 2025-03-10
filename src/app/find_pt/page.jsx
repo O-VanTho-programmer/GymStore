@@ -36,9 +36,9 @@ function page() {
 
   return (
     <div className='pt-16 px-4 sm:px-6 lg:px-8 xl:px-12'>
-      <h1 className='text-2xl sm:text-3xl md:text-4xl pt-12 font-bold'>Find your ideal PT</h1>
+      <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold'>Find your ideal PT</h1>
       <span className='mt-2 text-gray-400'>Seeking your ideal personal trainer based on your demand</span>
-      <h3 className='text-xl sm:text-2xl md:text-3xl font-bold text-[#404145] mt-4'>Most Popular in Hiring PT</h3>
+      <h3 className='text-xl sm:text-2xl md:text-3xl font-bold text-[#404145] mt-10'>Most Popular in Hiring PT</h3>
 
       <div className='flex flex-wrap gap-3 py-10'>
         {expertises && expertises.map((e, i) => (
@@ -46,9 +46,9 @@ function page() {
         ))}
       </div>
 
-      <div className='flex flex-wrap gap-2 py-10'>
+      <div className='flex flex-wrap gap-2 py-8'>
         {gigsAndProfile && gigsAndProfile.map((g, i) => (
-          <div key={i} className='w-full sm:w-1/2 md:w-1/3 lg:w-1/4 hover:scale-95 transition-transform duration-300'>
+          <div key={i} className='w-fit hover:scale-95 transition-transform duration-300'>
             <FitGig gig={g.gig} profile={g.profile} />
           </div>
         ))}

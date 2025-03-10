@@ -1,12 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import styles from './add_product.module.css';
+import styles from '../../add_product/add_product.module.css';
 import { CiCirclePlus } from "react-icons/ci";
 import AddCategory from '@/components/AddCategory/AddCategory';
 import axios from 'axios';
 import InformMessage from '@/components/InformMessage/InformMessage';
+import { useParams } from 'next/navigation';
 
 function Page() {
+    const { product_id } = useParams();
+
     const [pending, setPending] = useState(false);
     const [productName, setProductName] = useState('');
     const [description, setDescription] = useState('');
@@ -24,11 +27,46 @@ function Page() {
         setTimeout(() => setSuccessMessage(''), 1000);
     }
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/api/get_product_item/${product_id}`);
+                const product = res.data;
+
+                console.log(product)
+
+                setProductName(product.name || '');
+                setDescription(product.description || '');
+                setSize(product.sizes || []);
+                setGender(product.genders || []);
+                setCostPrice(product.cost_price || 0);
+                setSellPrice(product.sell_price || 0);
+                setStock(product.stock_quantity || 0);
+                setCategory(product.category_id || '');
+                setImages(product.images || []);
+                setSelectedImage(product.images[0] || null);
+
+                if (product.sizes && product.sizes.length > 0) {
+                    setIsSizeEnabled(true);
+                }
+
+                if(product.genders && product.genders.length > 0) {
+                    setIsGenderEnabled(true);
+                }
+            } catch (error) {
+                console.log("Error fetch product item", error);
+            }
+        }
+
+        fetchData();
+    },[])
+
     const handleSubmit = async () => {
         setPending(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/add_product",
-                {
+            const res = await axios.post("http://localhost:5000/api/update_product",
+                {   
+                    productId: product_id,
                     productName,
                     description,
                     sellPrice,
@@ -44,22 +82,9 @@ function Page() {
             )
 
             console.log("Response:", res.data);
-            showMessage(res.data.message);
-            setProductName('');
-            setDescription('');
-            setSellPrice(0);
-            setCostPrice(0);
-            setStock(0);
-            setCategory('');
-            setSize([]);
-            setGender([]);
-            setImages([]); 
-            setSelectedImage(null);
-            setIsSizeEnabled(false); 
-            setIsGenderEnabled(false);
-
+            showMessage("Product updated successfully");
         } catch (error) {
-            console.log("Error submit add product")
+            console.log("Error edit product")
         } finally {
             setPending(false);
         }
@@ -126,9 +151,9 @@ function Page() {
     return (
         <div className="p-6 bg-gray-100">
             <div className='flex items-center justify-between mb-4'>
-                <h3 className="text-xl font-bold">Add New Product</h3>
+                <h3 className="text-xl font-bold">Update Product</h3>
                 <button disabled={pending} onClick={handleSubmit} className='px-4 py-2 bg-blue-500 text-white rounded'>
-                    Add Product
+                    Update Product
                 </button>
             </div>
 
