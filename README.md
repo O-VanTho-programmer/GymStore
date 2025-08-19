@@ -1,4 +1,4 @@
-# 🏋️ Gym Store
+# Gym Store
 
 **Gym Store** is a comprehensive fitness marketplace built with **Next.js** that connects **personal trainers (PTs)** with clients while offering fitness products and services.  
 It combines **e-commerce**, **personal training services**, and **community features** into a single platform.
