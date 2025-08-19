@@ -1,37 +1,64 @@
+# 🏋️ Gym Store
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+**Gym Store** is a comprehensive fitness marketplace built with **Next.js** that connects **personal trainers (PTs)** with clients while offering fitness products and services.  
+It combines **e-commerce**, **personal training services**, and **community features** into a single platform.
 
-## Getting Started
+---
 
-First, run the development server:
+## ⚙️ Technology Stack
+- **Frontend:** Next.js 15.1.4 with React 19  
+- **Styling:** Tailwind CSS + custom CSS modules  
+- **State Management:** React Context API  
+- **HTTP Client:** Axios  
+- **UI Libraries:** Framer Motion (animations), React Icons  
+- **Charts:** Chart.js + react-chartjs-2  
+- **Maps:** Leaflet (location services)  
+- **File Upload:** Multer  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎯 Core Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 1. 🛒 E-commerce Store (`/store`)
+- Product catalog with categories  
+- Product search and filtering  
+- Shopping cart functionality  
+- Product reviews and ratings  
+- Admin product management  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. 🤝 Personal Trainer Marketplace (`/find_pt`)
+- Browse PT profiles by expertise  
+- Filter by fitness specialties (Bodybuilding, Weight Training, Yoga, etc.)  
+- View PT gigs and services  
+- Hire personal trainers  
 
-## Learn More
+### 3. 👤 User Management
+- User authentication (login/signup)  
+- Role-based access (Client, Trainer, Admin)  
+- User profiles and settings  
+- PT profile management  
 
-To learn more about Next.js, take a look at the following resources:
+### 4. 📊 Admin Dashboard (`/admin`)
+- Product management  
+- Category management  
+- Transaction monitoring  
+- Client and PT oversight  
+- Sales analytics with charts  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. 🛠️ Additional Tools
+- BMI calculator  
+- TDEE calculator  
+- Fitness tracking features  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🔐 User Roles & Permissions
+- **Clients:** Browse products, hire PTs, manage orders  
+- **Personal Trainers:** Create gigs, manage clients, showcase expertise  
+- **Admins:** Full platform management, analytics, user oversight  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🌐 API Integration
+The frontend connects to a backend API running at: http://localhost:5000
+
