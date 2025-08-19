@@ -38,7 +38,7 @@ function ClientTableAdmin({ users, isTrainer, setTrainerId }) {
                 )}
                 <td className='py-2'>
                   <a href={`/profile`} className='text-blue-500 hover:text-blue-700 mr-2'>View</a>
-                  <a href={`#`} className='text-green-500 hover:text-green-700'>Delete</a>
+                  <a href={`#`} className='text-red-500 hover:text-red-700'>Delete</a>
                 </td>
               </tr>
             ))}

@@ -25,6 +25,9 @@ function SideMenu({ activePath, setActivePath }) {
                 <a className={`p-2 rounded ${activePath === "/admin/dashboard/pt_management" ? "bg-blue-500" : "bg-gray-800 hover:bg-gray-700"}`} onClick={() => updateActivePath("/admin/dashboard/pt_management")} href="/admin/dashboard/pt_management">
                     Personal Trainer
                 </a>
+                <a className={`p-2 rounded ${activePath === "/admin/dashboard/application" ? "bg-blue-500" : "bg-gray-800 hover:bg-gray-700"}`} onClick={() => updateActivePath("/admin/dashboard/application")} href="/admin/dashboard/application">
+                    Applications
+                </a>
             </div>
         </div>
     )

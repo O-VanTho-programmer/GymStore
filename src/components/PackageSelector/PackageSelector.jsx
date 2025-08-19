@@ -2,24 +2,31 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function PackageSelector({ gigId }) {
+export default function PackageSelector({ gigId, trainerId }) {
   const [selectedPackage, setSelectedPackage] = useState('');
   const [packages, setPackages] = useState({});
 
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/get_packages/${gigId}`);
-        const packageData = res.data.reduce((acc, pkg) => {
+        const res = await axios.get(`http://localhost:5000/api/get_package/${gigId}`);
+        
+        if (!res.data.package) {
+          console.error("Invalid response structure", res.data.package);
+          return;
+        }
+    
+        const packageData = res.data.package.reduce((acc, pkg) => {
           acc[pkg.title] = { ...pkg, extras: 'Includes basic support' };
           return acc;
         }, {});
-
+    
         setPackages(packageData);
-        setSelectedPackage(Object.keys(packageData)[0]);
+        setSelectedPackage(Object.keys(packageData)[0] || null);
       } catch (error) {
-        console.error('Error fetching packages:', error);
+        console.error("Error fetching packages:", error);
       }
+    
     };
 
     fetchPackages();
@@ -28,7 +35,6 @@ export default function PackageSelector({ gigId }) {
   if (!selectedPackage || Object.keys(packages).length === 0) return <p>Loading packages...</p>;
 
   const currentPackage = packages[selectedPackage];
-  console.log(currentPackage)
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg w-full">
@@ -51,7 +57,7 @@ export default function PackageSelector({ gigId }) {
         <p className="whitespace-pre-line">{currentPackage.description}</p>
         <p className="text-sm font-medium mt-2">{currentPackage.extras}</p>
 
-        <button onClick={() => {window.location.href = `/payment/${gigId}/${currentPackage.id}`}} className=" bg-black text-white w-full py-2 rounded mt-4 hover:bg-gray-600">
+        <button onClick={() => {window.location.href = `/payment/${gigId}/${currentPackage.id}/${trainerId}`}} className=" bg-black text-white w-full py-2 rounded mt-4 hover:bg-gray-600">
           Continue →
         </button>
       </div>

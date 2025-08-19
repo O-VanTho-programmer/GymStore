@@ -51,10 +51,10 @@ function NavStore() {
                 <div className="flex items-center space-x-4">
                     {/* Shopping Cart Button */}
                     <button onClick={handleHrefCart} className="relative bg-white text-black text-lg sm:text-xl font-semibold w-20 sm:w-28 rounded-2xl h-10 sm:h-14 shadow-md group">
-                        <div className="bg-[#f36100] z-10 rounded-xl h-8 sm:h-12 w-2/5 flex items-center justify-center absolute left-1 top-[4px] group-hover:w-[80px] sm:group-hover:w-[104px] duration-500 shadow-md">
+                        <div className="bg-[#f36100] z-10 rounded-xl h-8 sm:h-12 w-2/5 flex items-center justify-center absolute left-1 top-[4px] group-hover:w-[72px] sm:group-hover:w-[87px] duration-500 shadow-md">
                             <FaShoppingCart color="white" />
                         </div>
-                        <p className="translate-x-5">Cart</p>
+                        <p className="translate-x-5 text-sm sm:text-lg ">Cart</p>
                         <label className="absolute z-10 top-0 left-0 text-[#f36100] bg-white rounded-full text-sm w-[20px] h-[20px]">{orderQuantity}</label>
                     </button>
 
@@ -63,7 +63,7 @@ function NavStore() {
                         <button onClick={toggleDropdown} className="flex items-center space-x-3">
                             <Avata image_url={currentUser?.avatar || "/guest_avatar.png"} width={40} height={40} />
                             <span className="text-white text-xl font-semibold">
-                                {currentUser ? currentUser.username : "Account"}
+                                {currentUser?.username || "Account"}
                             </span>
                             <FaAngleDown className="text-white" />
                         </button>
@@ -75,6 +75,7 @@ function NavStore() {
                                 <a href={currentUser ? "/store" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Store</a>
                                 <a href={currentUser ? "/my_profile" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Profile</a>
                                 <a href={currentUser ? "/settings" : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Settings</a>
+                                <a href={currentUser ? `/user/dashboard/${currentUser.userId}` : "/login"} className="block px-4 py-2 text-sm hover:bg-gray-100">Dashboard</a>
                                 {currentUser?.isAdmin && (
                                     <a href="/admin/dashboard" className="block px-4 py-2 text-sm hover:bg-gray-100">Dashboard Admin</a>
                                 )}

@@ -13,7 +13,7 @@ function NavStoreWrapper() {
         "/world",
 
     ];
-    const shouldHideNav = noNavStorePaths.includes(pathname) || pathname.startsWith('/find_pt') || pathname.startsWith('/admin') || pathname.startsWith('/my_profile') || pathname.startsWith('/payment');
+    const shouldHideNav = noNavStorePaths.includes(pathname) || pathname.startsWith('/find_pt') || pathname.startsWith('/admin') || pathname.startsWith('/my_profile') || pathname.startsWith('/payment') || pathname.startsWith('/user');
 
     return !shouldHideNav ? <NavStore /> : null;
 }

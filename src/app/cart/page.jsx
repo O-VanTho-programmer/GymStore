@@ -94,8 +94,13 @@ function Page() {
         userId: currentUser.userId,
         address: inputAddress
       })
-    } catch (error) {
 
+      showMessage(res.data.message);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error("Error purchasing", error);
     }
   }
 
@@ -164,7 +169,7 @@ function Page() {
             {!isCustomeAddress ? (
               <select onChange={(e) => setInputAddress(e.target.value)} className='w-full p-2 border rounded'>
                 {addresses?.map((a, i) => (
-                  <option key={i} value={a}>{a}</option>
+                  <option key={i} value={a.address}>{a.address}</option>
                 ))}
               </select>
             ) : (

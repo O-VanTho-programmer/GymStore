@@ -91,6 +91,11 @@ app.post('/api/sign_up', async (req, res) => {
 
     await db.query(queryOrder, [result.insertId]);
 
+    const queryProfile = `
+      INSERT INTO profile (user_id) VALUES (?)
+    `;
+    await db.query(queryProfile, [result.insertId]);
+
     res.json({ message: 'User signed up successfully', userId: result.insertId });
   } catch (error) {
     console.error('Error signing up user: ', error);
@@ -120,7 +125,7 @@ app.post('/api/login', async (req, res) => {
     const isAdmin = user.is_admin === 1;
 
     const token = jwt.sign(
-      { userId: user.userId, username: user.username, email: user.email, isTrainer, isAdmin },
+      { userId: user.userId, username: user.username, email: user.email, isTrainer, isAdmin, avatar: user.avatar },
       'Adassdghjkn-asd@f#gD<lvl',
       { expiresIn: '1h' }
     );
@@ -198,12 +203,7 @@ app.get('/api/get_user_address/:userId', async (req, res) => {
 
   try {
     const query = `SELECT * FROM address WHERE user_id = ?`;
-    const [rows] = await db.query(query, [userId]);
-
-    const addresses = rows.map(r =>
-      `${r.City}, ${r.Province}, ${r.Street}`
-    );
-
+    const [addresses] = await db.query(query, [userId]);
 
     res.status(200).json({ addresses });
   } catch (error) {
@@ -576,8 +576,8 @@ app.post('/api/purchase', async (req, res) => {
       UPDATE product p
       JOIN orderdetail od ON p.id = od.product_id
       JOIN \`order\` o ON od.order_id = o.id
-      SET p.sold_quantity = p.sold_quantity + od.quantity
-      SET p.stock_quantity = p.stock_quantity - od.quantity
+      SET p.sold_quantity = p.sold_quantity + od.quantity,
+          p.stock_quantity = p.stock_quantity - od.quantity
       WHERE o.user_id = ? AND o.status = 'Pending';
     `;
     await db.query(queryIncreaseSoldProduct, [userId]);
@@ -600,11 +600,27 @@ app.post('/api/purchase', async (req, res) => {
     });
     purchaseDetails.push({ 'total_price': orderDetails.reduce((sum, od) => sum + od.total_price_per, 0) });
     const filePath = await generatePurchaseExcel(purchaseDetails);
-    res.json({ message: "Purchase successful", filePath });
+    res.status(200).json({ message: "Purchase successful", filePath });
   } catch (error) {
     console.log(error);
   }
 })
+
+app.post('/api/purchase_gig', async (req, res) => {
+  const { trainerId, packageId, clientId, startDate, duration } = req.body;
+
+  try {
+    const query = `
+      INSERT INTO hire(trainer_id, client_id, gig_package_id, hire_date, due_date, status) VALUES (?, ?, ?, ?, DATE_ADD(?, INTERVAL ? MONTH), 'Pending');
+    `
+
+    await db.query(query, [trainerId, clientId, packageId, startDate, startDate, duration]);
+    res.json({ message: "Purchase successfully \n Wait for PT response" });
+  } catch (error) {
+    console.log("Error purchase gig", error);
+  }
+
+});
 
 // USER PROFILE
 app.post('/api/create_gig_review', async (req, res) => {
@@ -628,15 +644,16 @@ app.get('/api/get_user_gig_detail/:gigId', async (req, res) => {
     // Fetch gig details
     const queryGig = `
       SELECT g.*, 
-             COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating,
-             COUNT(gr.id) AS numReviews,
-             p.id AS profile_id,
-             p.level,
-             p.about_me,
-             p.video_url,
-             u.username,
-             u.is_personal_trainer,
-             u.avatar
+        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating,
+        COUNT(gr.id) AS numReviews,
+        p.id AS profile_id,
+        p.level,
+        p.about_me,
+        p.video_url,
+        u.username,
+        u.userId as user_id,
+        u.is_personal_trainer,
+        u.avatar
       FROM fit_gigs g
       JOIN profile p ON g.profile_id = p.id
       JOIN user u ON p.user_id = u.userId
@@ -676,6 +693,7 @@ app.get('/api/get_user_gig_detail/:gigId', async (req, res) => {
       about_me: gig.about_me,
       video_url: gig.video_url,
       username: gig.username,
+      user_id: gig.user_id,
       is_personal_trainer: gig.is_personal_trainer,
       avatar: gig.avatar,
       expertise_list: expertiseRows.map((row) => ({
@@ -924,6 +942,7 @@ app.get('/api/get_gigs_by_expetise/:expertise_id', async (req, res) => {
   }
 })
 
+
 // Edit my profile
 app.post('/api/edit_about_me', async (req, res) => {
   const { profileId, content } = req.body;
@@ -1036,30 +1055,134 @@ app.post('/api/create_gig', upload.single('image'), async (req, res) => {
 })
 
 app.post('/api/edit_profile', async (req, res) => {
-  const { userId, username, email, image } = req.body;
+  const { userId, username, email, phone, addresses, image } = req.body;
 
   try {
+    const queryUpdateUser = `
+      UPDATE user
+      SET 
+        username = ?,
+        email = ?,
+        avatar = ?,
+        number_phone = ?
+      WHERE userId = ?
+    `
+    await db.query(queryUpdateUser, [username, email, image, phone, userId]);
+    await db.query('DELETE FROM address WHERE user_id = ?', [userId]);
 
+    const queryAddAddress = `
+      INSERT INTO address(user_id, address) VALUES (?, ?);
+    `
+
+    if (addresses.length > 0) {
+
+      for (let address of addresses) {
+        await db.query(queryAddAddress, [userId, address]);
+      }
+    }
+
+    res.status(200).json({ message: "Profile updated successfully" });
   } catch (error) {
-
+    console.error("Error updating profile:", error);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 });
+
+// Application
+
+app.post('/api/send_apply', async (req, res) => {
+  const { userId, bio, certifications, year_of_exp, contact_infor } = req.body;
+
+  try {
+    const queryApplication = `
+      INSERT trainer_application (user_id, bio, certification, year_of_exp, contact_infor)
+      VALUES (?, ?, ?, ?, ?);
+    `;
+
+    await db.query(queryApplication, [userId, bio, certifications, year_of_exp, contact_infor]);
+    res.status(200).json({ message: "Send application successfully!" });
+  } catch (error) {
+    console.error("Error send application:", error);
+    res.status(500).json({ error: "Failed to send apply" });
+  }
+})
+
+app.get('/api/pt_applications', async (req, res) => {
+  try {
+    const query = `
+      SELECT u.username, u.email, ta.* 
+      FROM user u
+      JOIN trainer_application ta ON ta.user_id = u.userId
+    `;
+
+    const [applications] = await db.query(query);
+
+    res.status(200).json({ applications });
+  } catch (error) {
+    console.log("Error get application", error);
+  }
+})
+
+app.post(`/api/approve_application`, async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const query = 'UPDATE trainer_application SET status = "Approved" WHERE user_id = ?';
+    const querySetPT = `UPDATE user SET isPT = 1 WHERE userId = ?`
+
+    await db.query(query, [userId]);
+    await db.query(querySetPT, [userId]);
+
+    res.status(200);
+  } catch (error) {
+    console.log("Error approved", error);
+  }
+})
+
+app.post('/api/reject_application', async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const query = 'UPDATE trainer_application SET status = "Rejected" WHERE user_id = ?';
+    await db.query(query, [userId]);
+
+    res.status(200);
+  } catch (error) {
+    console.log("Error Rejected", error);
+  }
+})
+
+// 
+
+app.post('/api/change_password', async (req, res) => {
+  const { userId, currentPassword, newPassword } = req.body;
+
+  try {
+    const query = `
+      SELECT password_hash FROM user
+      WHERE userId = ?
+    `;
+
+    const [password] = await db.query(query, [userId]);
+    const isPasswordValid = await bcrypt.compare(currentPassword, password[0].password_hash);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    const newHashPassword = await bcrypt.hash(newPassword, 10);
+    await db.query('UPDATE user SET password_hash = ? WHERE userId = ?', [newHashPassword, userId])
+    res.json({ message: "Password updated successfully" });
+
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+})
 // Searching'
 
 // Package of gig
-app.get('/api/get_packages/:gig_id', async (req, res) => {
-  const { gig_id } = req.params;
-
-  try {
-    const query = `SELECT * FROM gig_package WHERE gig_id = ?`;
-    const [packages] = await db.query(query, [gig_id]);
-
-    res.status(200).json(packages);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to fetch packages' });
-  }
-});
+app.get('/api/get_packages/:gig_id', getGigPackage);
 
 app.get('/api/get_package/:package_id', async (req, res) => {
   const { package_id } = req.params;
@@ -1074,9 +1197,299 @@ app.get('/api/get_package/:package_id', async (req, res) => {
 
     res.json({ message: "", package })
   } catch (error) {
+    res.status(500).json({message: 'Error with get package', error})
+  }
+})
+
+///User Dashboard
+
+// PT
+app.get('/api/get_new_request/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const query = `
+      SELECT * FROM hire WHERE trainer_id = ? AND isSaw = 0;
+    `;
+
+    const [requests] = await db.query(query, [trainerId]);
+
+    res.status(200).json({ requests });
+  } catch (error) {
+    console.log("Fetch Error", error);
+  }
+})
+
+app.get('/api/get_pt_revenue/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const query = `
+      SELECT gp.gig_id, g.title, gp.title, u.usename, gp.price, h.hire_date as start_date, h.due_date, h.status
+      FROM gig_package gp
+      JOIN fit_gigs g ON gp.gig_id = g.id
+      JOIN hire h ON gp.id = h.gig_package_id
+      JOIN user u ON u.userId = h.client_id
+      HAVING h.trainer_id = ?
+    `;
+
+    const [revenue] = await db.query(query, [trainerId]);
+    res.json({ revenue });
+  } catch (error) {
+    console.error("Error fetching revenue:", error);
+    res.status(500).json({ error: "Failed to fetch revenue" });
+  }
+});
+
+app.get('/api/get_request_service/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const query = `
+      SELECT h.id, g.title, g.image_url, gp.title as gig_package, DATE_FORMAT(h.hire_date, '%d/%m/%Y') AS hire_date
+      FROM hire h
+      JOIN gig_package gp ON gp.id = h.gig_package_id
+      JOIN fit_gigs g ON g.id = gp.gig_id
+      WHERE h.trainer_id = ? AND h.status = 'Pending';
+    `;
+
+    const [requests] = await db.query(query, [trainerId]);
+    res.status(200).json({ requests: requests });
+  } catch (error) {
+    console.error("Error getting request service:", error);
+    res.status(500).json({ error: "Failed to fetch request services" });
+  }
+});
+
+
+app.get('/api/get_active_gig/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const query = `
+      SELECT g.title, g.image_url, gp.title as gig_package, h.hire_date, h.due_date
+      FROM hire h
+      JOIN gig_package gp ON gp.id = h.gig_package_id
+      JOIN fit_gigs g ON g.id = gp.gig_id
+      WHERE h.trainer_id = ? AND h.status = 'Active'
+    `;
+
+    const [activeGigs] = await db.query(query, [trainerId]);
+    res.json({ activeGigs });
+  } catch (error) {
+    console.log("Error get active gigs", error);
+  }
+})
+
+app.get('/api/get_complete_gig/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const query = `
+      SELECT g.title, gp.title as gig_package, h.hire_date
+      FROM hire h
+      JOIN gig_package gp ON gp.id = h.gig_package_id
+      JOIN gig g ON g.id = gp.gig_id
+      WHERE h.trainer_id = ? AND h.status != 'Finish'
+    `;
+
+    const [paidGigs] = await db.query(query, [trainerId]);
+    res.json({ paidGigs });
+  } catch (error) {
 
   }
 })
+
+app.get('/api/get_gig/:trainerId', async (req, res) => {
+  const { trainerId } = req.params;
+
+  try {
+    const queryGig = `
+      SELECT g.*, 
+        COUNT(gr.id) AS numReviews, 
+        COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM fit_gigs g
+      LEFT JOIN gig_review gr ON gr.gig_id = g.id
+      JOIN profile p ON g.profile_id = p.id
+      WHERE p.user_id = ?
+      GROUP BY g.id
+    `;
+
+    const [gigs] = await db.query(queryGig, [trainerId]);
+
+    res.status(200).json({ gigs });
+  } catch (error) {
+    console.error("Error fetching gigs:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
+
+app.get('/api/get_gig_by_id/:gigId', async (req, res) => {
+
+  const {gigId} = req.params;
+  try {
+    const query = `
+      SELECT * from fit_gigs
+      WHERE id = ?
+    `
+
+    const [gig] = await db.query(query,[gigId]);
+    return res.json({gig});
+  } catch (error) {
+    return res.status(500).json({message: "Error get gig by id", error});
+  }
+})
+
+// Client
+app.get('/api/get_purchased_gig_package/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+
+    const queryUpdateCancelStatus = `
+      UPDATE hire
+      SET status = 'Cancel'
+      WHERE hire_date < NOW() AND status = 'Pending';
+    `;
+
+    await db.query(queryUpdateCancelStatus);
+
+    const queryUpdateFinishStatus = `
+      UPDATE hire
+      SET status = 'Finish'
+      WHERE status = 'Active' AND due_date < NOW();
+    `;
+
+    await db.query(queryUpdateFinishStatus);
+
+    const query = `
+      SELECT g.title, g.description, g.image_url, gp.*, h.id AS hire_id, h.status, h.hire_date, h.due_date, DATEDIFF(due_date, NOW()) AS duration
+      FROM hire h
+      JOIN gig_package gp ON h.gig_package_id = gp.id
+      JOIN fit_gigs g ON gp.gig_id = g.id
+      WHERE h.client_id = ?
+    `;
+
+    const [gigs] = await db.query(query, [userId]);
+    res.json({ gigs });
+  } catch (error) {
+    console.error("Error fetching gigs:", error);
+    res.status(500).json({ error: "Failed to fetch gigs" });
+  }
+})
+
+app.post('/api/cancel_gig', async (req, res) => {
+  const { hireId } = req.body;
+
+  try {
+    const query = `UPDATE hire SET status = 'Cancel' WHERE id = ?`;
+    await db.query(query, [hireId]);
+    res.json({ message: "Gig canceled successfully" });
+  } catch (error) {
+    console.error("Error canceling gig:", error);
+    res.status(500).json({ error: "Failed to cancel gig" });
+  }
+})
+
+app.post('/api/accept_gig', async (req, res) => {
+  const { hireId } = req.body;
+
+  try {
+    const query = `UPDATE hire SET status = 'Accepted' WHERE id = ?`;
+    await db.query(query, [hireId]);
+    res.json({ message: "Gig accepted successfully" });
+  } catch (error) {
+    console.error("Error accepting gig:", error);
+    res.status(500).json({ error: "Failed to accept gig" });
+  }
+})
+
+app.get('/api/get_hired_pt/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `
+      SELECT u.userId as id, u.username, u.avatar, COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
+      FROM hire h
+      JOIN user u ON u.userId = h.trainer_id
+      JOIN gig_package gp ON h.gig_package_id = gp.id
+      JOIN fit_gigs g ON gp.gig_id = g.id
+      LEFT JOIN gig_review gr ON gr.gig_id = g.id
+      WHERE h.client_id = ?
+      GROUP BY u.userId
+    `
+    const [trainers] = await db.query(query, [userId]);
+
+    res.json({ trainers });
+  } catch (error) {
+    console.log("Error get hired pt", error);
+  }
+
+})
+
+// Shopping
+app.get('/api/get_order_delivering/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `
+      SELECT 
+        o.id AS order_id,
+        o.create_date,
+        o.status,
+        p.name AS product_name,
+        od.quantity,
+        p.sell_price,
+        pi.image_url
+      FROM \`order\` o
+      JOIN orderdetail od ON o.id = od.order_id
+      JOIN product p ON od.product_id = p.id
+      JOIN product_image pi ON pi.product_id = p.id
+      WHERE o.user_id = ? AND o.status = 'Delivering';
+    `;
+
+    const [orders] = await db.query(query, [userId]);
+    res.json({ orders });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+})
+
+app.get('/api/get_order_history/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const query = `
+      SELECT 
+        o.id AS order_id,
+        o.create_date,
+        o.status,
+        SUM(p.sell_price * od.quantity) AS total_price,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'product_name', p.name,
+            'quantity', od.quantity,
+            'price', p.sell_price,
+            'image_url', (SELECT image_url FROM product_image WHERE product_id = p.id LIMIT 1)
+          )
+        ) AS products
+      FROM \`order\` o
+      JOIN orderdetail od ON o.id = od.order_id
+      JOIN product p ON od.product_id = p.id
+      WHERE o.user_id = ? AND o.status = 'Delivered'
+      GROUP BY o.id;
+    `;
+
+    const [orders] = await db.query(query, [userId]);
+    res.json({ orders });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+})
+
+
 
 // Admin Dashboard
 app.get('/api/get_product_admin/:name', async (req, res) => {
@@ -1255,7 +1668,7 @@ app.get('/api/get_hired_clients/:trainerId', async (req, res) => {
   try {
     const query = `
       SELECT 
-        u.username, u.email, h.hire_date, h.due_date, COALESCE(ROUND(AVG(gr.rating), 1), 0) AS review
+        u.username, u.email, h.hire_date, h.due_date, COALESCE(ROUND(AVG(gr.rating), 1), 0) AS review, h.status
       FROM user u
       JOIN hire h ON h.client_id = u.userId
       JOIN profile p ON p.user_id = ?
@@ -1290,3 +1703,20 @@ process.on('SIGINT', () => {
 });
 
 module.exports = db;
+
+
+// Function
+
+async function getGigPackage(req, res) {
+  const { gig_id } = req.params; 
+
+  try {
+    const query = `SELECT * FROM gig_package WHERE gig_id = ?`;
+    const [packages] = await db.query(query, [gig_id]);
+
+    res.status(200).json({ packages });
+  } catch (error) {
+    console.error("Error fetching packages:", error);
+    res.status(500).json({ error: "Failed to fetch packages" });
+  }
+}

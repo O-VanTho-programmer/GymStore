@@ -12,7 +12,7 @@ function NavWrapper() {
         "/login", "/sign_up",
 
     ];
-    const shouldHideNav = noNavPaths.includes(pathname) || pathname.startsWith('/store') || pathname.startsWith('/settings') || pathname.startsWith('/admin') || pathname.startsWith('/calculate_tool') || pathname.startsWith('/cart') ;
+    const shouldHideNav = noNavPaths.includes(pathname) || pathname.startsWith('/store') || pathname.startsWith('/settings') || pathname.startsWith('/admin') || pathname.startsWith('/calculate_tool') || pathname.startsWith('/cart') || pathname.startsWith('/user');
 
     return !shouldHideNav ? <Navar /> : null;
 }

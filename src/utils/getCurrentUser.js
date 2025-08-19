@@ -7,9 +7,9 @@ const getCurrentUser = () => {
   }
   try {
     const decodedToken = jwtDecode.decode(authToken);
-    const { userId, email, isTrainer, isAdmin } = decodedToken;
+    const { userId, username, email, isTrainer, isAdmin, avatar } = decodedToken;
 
-    return { userId, email, isTrainer, isAdmin };
+    return { userId, username, email, isTrainer, isAdmin, avatar };
   } catch (error) {
     console.error('Error decoding token:', error);
     return null;

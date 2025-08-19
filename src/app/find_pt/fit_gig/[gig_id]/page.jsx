@@ -167,7 +167,7 @@ function FitGigDetails() {
             </div>
 
             <div className='w-full lg:w-1/3'>
-                <PackageSelector gigId={gig_id} />
+                <PackageSelector gigId={gig_id} trainerId={profile.user_id} />
             </div>
         </div>
     )
