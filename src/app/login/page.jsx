@@ -6,8 +6,8 @@ import LoadingWrapper from '@/components/Loading/LoadingWrapper';
 import Loading from '@/components/Loading/Loading';
 
 function Page() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin2@gmail.com');
+  const [password, setPassword] = useState('123');
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);

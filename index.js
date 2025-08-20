@@ -1660,7 +1660,6 @@ app.get('/api/get_trainer', async (req, res) => {
         u.userId, 
         u.username, 
         u.email, 
-        up.phone_number, 
         COALESCE(GROUP_CONCAT(DISTINCT e.expertise SEPARATOR ', '), 'None') AS expertise, 
         COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
       FROM user u
