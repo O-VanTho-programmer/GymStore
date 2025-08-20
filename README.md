@@ -1,3 +1,21 @@
+## 🚀 About This Project
+
+This was one of my very first projects when I just started my coding journey.
+To be honest… it’s a bit of a Frankenstein monster — full of messy code, broken rules, and unfinished features. But hey, that’s the beauty of learning! 🎉
+
+At the time, I was just a junior dev trying to build something awesome (and maybe impress future me 🙃). Along the way, I picked up a lot:
+
+⚛️ React framework basics (and how not to structure a project)
+
+🛠️ Building backend APIs that sometimes actually work
+
+🎨 UI experiments that may or may not hurt your eyes
+
+🛒 An attempt at an e-commerce system (discounts? maybe… bugs? definitely ✅)
+
+It’s not finished, it’s not perfect, and it’s full of errors 🐛 but it’s mine. And I appreciate the process because this project helped me level up a lot 💪. So yeah, welcome to my beautiful mess
+
+---
 # Gym Store
 
 **Gym Store** is a comprehensive fitness marketplace built with **Next.js** that connects **personal trainers (PTs)** with clients while offering fitness products and services.  
