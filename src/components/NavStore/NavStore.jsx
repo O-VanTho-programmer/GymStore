@@ -51,7 +51,7 @@ function NavStore() {
                 <div className="flex items-center space-x-4">
                     {/* Shopping Cart Button */}
                     <button onClick={handleHrefCart} className="relative bg-white text-black text-lg sm:text-xl font-semibold w-20 sm:w-28 rounded-2xl h-10 sm:h-14 shadow-md group">
-                        <div className="bg-[#f36100] z-10 rounded-xl h-8 sm:h-12 w-2/5 flex items-center justify-center absolute left-1 top-[4px] group-hover:w-[72px] sm:group-hover:w-[87px] duration-500 shadow-md">
+                        <div className="bg-[#f36100] z-10 rounded-xl h-8 sm:h-12 w-2/5 flex items-center justify-center absolute left-1 top-[4px] group-hover:w-[72px] sm:group-hover:w-[102px] duration-500 shadow-md">
                             <FaShoppingCart color="white" />
                         </div>
                         <p className="translate-x-5 text-sm sm:text-lg ">Cart</p>

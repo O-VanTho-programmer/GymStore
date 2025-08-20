@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import BannerSlider from '@/components/BannerSlider/BannerSlider';
 import { FaShieldAlt } from 'react-icons/fa';
+import LoadingWrapper from '@/components/Loading/LoadingWrapper';
 
 const IMAGES = ["/PT.png", "equipment.jpg", "friends.jpg"];
 const TITLES = ['Get yourself a personal trainer', 'Every gymer should have', 'Lets find yourself a gym bro'];
@@ -11,10 +12,11 @@ const LINKS = ['/pt', '/store', '/find_friends'];
 
 const HomePage = () => {
   return (
-    <div>
-      <div className='h-screen'>
-        <BannerSlider image_url={IMAGES} title={TITLES} span_btn={SPAN_BTNS} link={LINKS} />
-      </div>
+    <LoadingWrapper loadingText="Loading Gym Store...">
+      <div>
+        <div className='h-screen'>
+          <BannerSlider image_url={IMAGES} title={TITLES} span_btn={SPAN_BTNS} link={LINKS} />
+        </div>
 
       <div id='services' className="sector py-16 bg-gray-100 text-gray-700 flex flex-col items-center text-center">
         <p className='text-gray-700 w-full md:w-3/5 mb-12 px-4'>
@@ -96,6 +98,7 @@ const HomePage = () => {
         </div> */}
       </div>
     </div>
+    </LoadingWrapper>
   );
 };
 

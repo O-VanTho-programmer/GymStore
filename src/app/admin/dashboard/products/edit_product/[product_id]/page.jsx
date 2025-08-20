@@ -50,7 +50,7 @@ function Page() {
                     setIsSizeEnabled(true);
                 }
 
-                if(product.genders && product.genders.length > 0) {
+                if (product.genders && product.genders.length > 0) {
                     setIsGenderEnabled(true);
                 }
             } catch (error) {
@@ -59,13 +59,13 @@ function Page() {
         }
 
         fetchData();
-    },[])
+    }, [])
 
     const handleSubmit = async () => {
         setPending(true);
         try {
             const res = await axios.post("http://localhost:5000/api/update_product",
-                {   
+                {
                     productId: product_id,
                     productName,
                     description,
@@ -89,6 +89,18 @@ function Page() {
             setPending(false);
         }
     };
+
+    const handleDelete = async () => {
+        setPending(true);
+        try {
+            const res = await axios.post('http://localhost:5000/api/delete_product', { product_id })
+
+        } catch (error) {
+            console.log("Error delete product")
+        } finally {
+            setPending(false);
+        }
+    }
 
     const handleSizeChange = (size) => {
         setSize((prev) =>
@@ -152,9 +164,14 @@ function Page() {
         <div className="p-6 bg-gray-100">
             <div className='flex items-center justify-between mb-4'>
                 <h3 className="text-xl font-bold">Update Product</h3>
-                <button disabled={pending} onClick={handleSubmit} className='px-4 py-2 bg-blue-500 text-white rounded'>
-                    Update Product
-                </button>
+                <div>
+                    <button disabled={pending} onClick={handleDelete} className='px-4 py-2 bg-red-500 text-white rounded'>
+                        Delete Product
+                    </button>
+                    <button disabled={pending} onClick={handleSubmit} className='px-4 py-2 bg-blue-500 text-white rounded ml-4'>
+                        Update Product
+                    </button>
+                </div>
             </div>
 
             <div className='flex gap-4'>

@@ -61,19 +61,32 @@ function DashboardLayout({ children }) {
                             {openSetting && (
                                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg py-2">
                                     <ul className="text-sm text-gray-700">
-                                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                            Profile
+                                        <li>
+                                            <a href="/profile" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                                                Profile
+                                            </a>
                                         </li>
-                                        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                                            Settings
+                                        <li>
+                                            <a href="/store" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                                                Store
+                                            </a>
                                         </li>
-                                        <li onClick={handleLogout} className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500">
-                                            Logout
+                                        <li>
+                                            <a href="/settings" className="block px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                                                Settings
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                                            >
+                                                Logout
+                                            </button>
                                         </li>
                                     </ul>
                                 </div>
                             )}
-
                         </div>
                     </div>
                 </div>

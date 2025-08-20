@@ -6,6 +6,8 @@ import { UserProvider } from "@/context/UserContext";
 import NavWrapper from "@/components/NavWrapper/NavWrapper";
 import { SearchProvider } from "@/context/SearchContext";
 import { QuantityOrderProvider } from "@/context/QuantityOrderProvider";
+import { LoadingProvider } from "@/context/LoadingContext";
+import GlobalLoadingBar from "@/components/Loading/GlobalLoadingBar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,14 +22,17 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="relative">
         <UserProvider>
-          <QuantityOrderProvider>
-            <SearchProvider>
-              <NavWrapper />
-              <NavStoreWrapper />
-              {children}
-              <FooterWrapper />
-            </SearchProvider>
-          </QuantityOrderProvider>
+          <LoadingProvider>
+            <QuantityOrderProvider>
+              <SearchProvider>
+                {/* <GlobalLoadingBar /> */}
+                <NavWrapper />
+                <NavStoreWrapper />
+                {children}
+                <FooterWrapper />
+              </SearchProvider>
+            </QuantityOrderProvider>
+          </LoadingProvider>
         </UserProvider>
       </body>
     </html>

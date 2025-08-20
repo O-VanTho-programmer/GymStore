@@ -86,7 +86,7 @@ app.post('/api/sign_up', async (req, res) => {
     const [result] = await db.query(query, [username, email, password_hash, false, false]);
 
     const queryOrder = `
-      INSERT INTO order (user_id) VALUES (?)
+      INSERT INTO \`order\` (user_id) VALUES (?)
     `;
 
     await db.query(queryOrder, [result.insertId]);
@@ -142,7 +142,7 @@ app.get('/api/get_category', async (req, res) => {
   try {
     const query = `
     SELECT c.*, COUNT(p.id) AS product_count FROM category c
-    LEFT JOIN product p ON c.id = p.category_id
+    LEFT JOIN product p ON c.id = p.category_id AND p.is_deleted = 0
     GROUP BY c.id`;
 
     const [categories] = await db.query(query);
@@ -232,7 +232,7 @@ app.get('/api/get_product_item/:id', async (req, res) => {
     LEFT JOIN product_image pi ON p.id = pi.product_id
     LEFT JOIN product_flavour pf ON p.id = pf.product_id 
     LEFT JOIN flavour f ON pf.flavour_id = f.id
-    WHERE p.id = ?
+    WHERE p.id = ? AND p.is_deleted = 0
     GROUP BY p.id;
 
     `;
@@ -275,7 +275,7 @@ app.get('/api/get_product/:name', async (req, res) => {
     LEFT JOIN product_image pi ON p.id = pi.product_id
     LEFT JOIN product_flavour pf ON p.id = pf.product_id  
     LEFT JOIN flavour f ON pf.flavour_id = f.id  
-    ${name !== 'all' ? "WHERE p.stock_quantity > 0 AND (p.name LIKE ? OR p.description LIKE ?)" : "WHERE p.stock_quantity > 0"}
+    ${name !== 'all' ? "WHERE p.stock_quantity > 0 AND p.is_deleted = 0 AND (p.name LIKE ? OR p.description LIKE ?)" : "WHERE p.stock_quantity > 0 AND p.is_deleted = 0"}
     GROUP BY p.id;
     `;
 
@@ -316,7 +316,7 @@ app.get('/api/get_product_by_category/:categoryId', async (req, res) => {
           LEFT JOIN product_flavour pf ON p.id = pf.product_id  
           LEFT JOIN flavour f ON pf.flavour_id = f.id  
           WHERE p.stock_quantity > 0 AND p.category_id = ?
-          GROUP BY p.id;
+          GROUP BY p.id AND p.is_deleted = 0;
       `;
 
     const [products] = await db.query(query, [categoryId]);
@@ -1197,7 +1197,7 @@ app.get('/api/get_package/:package_id', async (req, res) => {
 
     res.json({ message: "", package })
   } catch (error) {
-    res.status(500).json({message: 'Error with get package', error})
+    res.status(500).json({ message: 'Error with get package', error })
   }
 })
 
@@ -1326,17 +1326,17 @@ app.get('/api/get_gig/:trainerId', async (req, res) => {
 
 app.get('/api/get_gig_by_id/:gigId', async (req, res) => {
 
-  const {gigId} = req.params;
+  const { gigId } = req.params;
   try {
     const query = `
       SELECT * from fit_gigs
       WHERE id = ?
     `
 
-    const [gig] = await db.query(query,[gigId]);
-    return res.json({gig});
+    const [gig] = await db.query(query, [gigId]);
+    return res.json({ gig });
   } catch (error) {
-    return res.status(500).json({message: "Error get gig by id", error});
+    return res.status(500).json({ message: "Error get gig by id", error });
   }
 })
 
@@ -1443,7 +1443,7 @@ app.get('/api/get_order_delivering/:userId', async (req, res) => {
         pi.image_url
       FROM \`order\` o
       JOIN orderdetail od ON o.id = od.order_id
-      JOIN product p ON od.product_id = p.id
+      JOIN product p ON od.product_id = p.id AND p.is_deleted = 0
       JOIN product_image pi ON pi.product_id = p.id
       WHERE o.user_id = ? AND o.status = 'Delivering';
     `;
@@ -1503,10 +1503,12 @@ app.get('/api/get_product_admin/:name', async (req, res) => {
           p.cost_price,
           p.sell_price,
           p.sold_quantity,
+          p.is_deleted,
           c.name AS category_name
       FROM product p
       JOIN category c ON p.category_id = c.id
-      ${name !== 'all' ? "WHERE p.name LIKE ? OR p.description LIKE ?" : ""}
+      WHERE p.is_deleted = 0 
+        ${name !== 'all' ? "AND (p.name LIKE ? OR p.description LIKE ?)" : ""}
       ORDER BY p.stock_quantity <= 10 DESC, p.update_at DESC;
     `;
 
@@ -1550,7 +1552,7 @@ app.post('/api/update_product', async (req, res) => {
         cost_price = ?, 
         category_id = ?, 
         stock_quantity = ?
-      WHERE id = ?;
+      WHERE id = ? AND is_deleted = 0;
     `
     await db.query(query, [productName, description, sellPrice, costPrice, category, stock, productId]);
 
@@ -1579,13 +1581,30 @@ app.post('/api/update_product', async (req, res) => {
       }
     }
 
-    res.json({ message: "Update Product Susccessfully" });
+    return res.json({ message: "Update Product Susccessfully" });
 
   } catch (error) {
     console.log('Error', error)
   }
 
 });
+
+app.post('/api/delete_product', async (req, res) => {
+  const { product_id } = req.body;
+
+  try {
+    const query = `
+      UPDATE product
+      SET is_deleted = 1
+      WHERE id = ?
+    `
+    await db.query(query, [product_id]);
+
+    return res.json({ message: "Remove Product Susccessfully" });
+  } catch (error) {
+    console.log('Error', error)
+  }
+})
 
 app.get('/api/get_transaction', async (req, res) => {
   try {
@@ -1600,7 +1619,7 @@ app.get('/api/get_transaction', async (req, res) => {
       FROM \`order\` o
       JOIN user u ON o.user_id = u.userId
       JOIN orderdetail od ON o.id = od.order_id
-      JOIN product p ON od.product_id = p.id
+      JOIN product p ON od.product_id = p.id AND p.is_deleted = 0
       ORDER BY o.create_date DESC;
     `;
 
@@ -1621,7 +1640,7 @@ app.get('/api/get_revenue_and_sold', async (req, res) => {
         SUM(od.quantity) AS total_sold,
         SUM(od.quantity * p.sell_price) AS total_revenue
       FROM orderdetail od
-      JOIN product p ON od.product_id = p.id
+      JOIN product p ON od.product_id = p.id AND p.is_deleted = 0
       JOIN \`order\` o ON o.id = od.order_id
       WHERE o.create_date BETWEEN ? AND ?;
     `;
@@ -1645,14 +1664,13 @@ app.get('/api/get_trainer', async (req, res) => {
         COALESCE(GROUP_CONCAT(DISTINCT e.expertise SEPARATOR ', '), 'None') AS expertise, 
         COALESCE(ROUND(AVG(gr.rating), 1), 0) AS rating
       FROM user u
-      LEFT JOIN user_numberphone up ON u.userId = up.user_id
       JOIN profile p ON p.user_id = u.userId
       JOIN pt_expertise pe ON pe.profile_id = p.id
       LEFT JOIN expertise e ON e.id = pe.expertise_id
       LEFT JOIN fit_gigs g ON g.profile_id = p.id
       LEFT JOIN gig_review gr ON gr.gig_id = g.id
       WHERE u.is_personal_trainer = 1
-      GROUP BY u.userId, u.username, u.email, up.phone_number;
+      GROUP BY u.userId, u.username, u.email;
     `;
     const [trainers] = await db.query(query);
     res.json({ trainers });
@@ -1708,7 +1726,7 @@ module.exports = db;
 // Function
 
 async function getGigPackage(req, res) {
-  const { gig_id } = req.params; 
+  const { gig_id } = req.params;
 
   try {
     const query = `SELECT * FROM gig_package WHERE gig_id = ?`;
