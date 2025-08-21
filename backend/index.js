@@ -3,8 +3,8 @@ const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const upload = require('../src/utils/upload');
-const generatePurchaseExcel = require('../src/utils/generatePurchaseExcel');
+const upload = require('./upload');
+const generatePurchaseExcel = require('./generatePurchaseExcel');
 
 const app = express();
 app.use(cors()); // Enable CORS for all routes
