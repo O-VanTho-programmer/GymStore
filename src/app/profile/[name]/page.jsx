@@ -15,12 +15,12 @@ function page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/get_user_profile/${name}`);
+        const { data } = await axios.get(`gymstore-production.up.railway.app/api/get_user_profile/${name}`);
         setProfile(data.profile);
         setGigs(data.gigs);
 
         const reviewResponse = await axios.get(
-          `http://localhost:5000/api/get_profile_review/${data.profile.id}`
+          `gymstore-production.up.railway.app/api/get_profile_review/${data.profile.id}`
         );
         setReviews(reviewResponse.data.reviews);
       } catch (error) {

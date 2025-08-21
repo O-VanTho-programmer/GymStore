@@ -24,7 +24,7 @@ export default function EditIntroVideo({ onClose, onSave, profileId }) {
         formData.append('profileId', profileId);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/upload/video', formData, {
+            const res = await axios.post('gymstore-production.up.railway.app/api/upload/video', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 

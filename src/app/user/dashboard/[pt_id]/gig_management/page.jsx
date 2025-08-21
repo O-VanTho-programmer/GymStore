@@ -18,13 +18,13 @@ function page() {
         return;
       }
       try {
-        const resRequestServices = await axios.get(`http://localhost:5000/api/get_request_service/${currentUser.userId}`);
+        const resRequestServices = await axios.get(`gymstore-production.up.railway.app/api/get_request_service/${currentUser.userId}`);
         setRequestServices(resRequestServices.data.requests);
 
-        const resActiveGig = await axios.get(`http://localhost:5000/api/get_active_gig/${currentUser.userId}`);
+        const resActiveGig = await axios.get(`gymstore-production.up.railway.app/api/get_active_gig/${currentUser.userId}`);
         setGigInActive(resActiveGig.data.activeGigs);
 
-        const resAllGig = await axios.get(`http://localhost:5000/api/get_gig/${currentUser.userId}`);
+        const resAllGig = await axios.get(`gymstore-production.up.railway.app/api/get_gig/${currentUser.userId}`);
         console.log(resAllGig.data.gigs);
         setAllGigs(resAllGig.data.gigs);
       } catch (error) {
@@ -37,7 +37,7 @@ function page() {
 
   const acceptRequest = async ({ hireId }) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/accept_gig", { hireId });
+      const res = await axios.post("gymstore-production.up.railway.app/api/accept_gig", { hireId });
     } catch (error) {
 
     }
@@ -45,7 +45,7 @@ function page() {
 
   const cancelRequest = async ({ hireId }) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/cancel_gig", { hireId });
+      const res = await axios.post("gymstore-production.up.railway.app/api/cancel_gig", { hireId });
     } catch (error) {
 
     }

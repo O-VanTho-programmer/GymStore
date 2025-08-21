@@ -12,11 +12,11 @@ function page() {
     useEffect(() => {
         const fetchGigData = async () => {
             try {
-                const gigRes = await axios.get(`http://localhost:5000/api/get_gig_by_id/${gig_id}`);
+                const gigRes = await axios.get(`gymstore-production.up.railway.app/api/get_gig_by_id/${gig_id}`);
                 console.log(gigRes.data);
                 setGigDetails(gigRes.data.gig[0] || {});
 
-                const packageRes = await axios.get(`http://localhost:5000/api/get_package/${gig_id}`);
+                const packageRes = await axios.get(`gymstore-production.up.railway.app/api/get_package/${gig_id}`);
                 console.log(packageRes.data.package)
                 setGigPackages(packageRes.data.package);
             } catch (error) {
@@ -41,8 +41,8 @@ function page() {
 
     const handleSave = async () => {
         try {
-            await axios.post(`http://localhost:5000/api/update_gig`, gigDetails);
-            await axios.post(`http://localhost:5000/api/update_packages`, { packages: gigPackages });
+            await axios.post(`gymstore-production.up.railway.app/api/update_gig`, gigDetails);
+            await axios.post(`gymstore-production.up.railway.app/api/update_packages`, { packages: gigPackages });
             alert('Gig updated successfully!');
         } catch (error) {
             console.error('Error updating gig:', error);

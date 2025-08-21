@@ -38,7 +38,7 @@ function ProfilePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/get_my_profile/${currentUser.userId}`);
+                const res = await axios.get(`gymstore-production.up.railway.app/api/get_my_profile/${currentUser.userId}`);
 
                 setProfile(res.data.profile);
                 setGigs(res.data.gigs);
@@ -57,7 +57,7 @@ function ProfilePage() {
         if (newAboutMe !== profile.about_me) {
             setProfile({ ...profile, about_me: newAboutMe });
             try {
-                const res = await axios.post(`http://localhost:5000/api/edit_about_me`, {
+                const res = await axios.post(`gymstore-production.up.railway.app/api/edit_about_me`, {
                     profileId: profile.id,
                     content: newAboutMe
                 })

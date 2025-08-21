@@ -12,7 +12,7 @@ function ProductTableAdmin() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/get_product_admin/${nameSearch}`);
+                const res = await axios.get(`gymstore-production.up.railway.app/api/get_product_admin/${nameSearch}`);
                 
                 setProducts(res.data.products);
             } catch (error) {

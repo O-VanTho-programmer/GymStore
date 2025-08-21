@@ -12,8 +12,8 @@ function page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resGig = await axios.get(`http://localhost:5000/api/get_purchased_gig_package/${currentUser.userId}`);
-        const resPT = await axios.get(`http://localhost:5000/api/get_hired_pt/${currentUser.userId}`);
+        const resGig = await axios.get(`gymstore-production.up.railway.app/api/get_purchased_gig_package/${currentUser.userId}`);
+        const resPT = await axios.get(`gymstore-production.up.railway.app/api/get_hired_pt/${currentUser.userId}`);
 
         setPurchasedGigs(resGig.data.gigs);
         setHiredPT(resPT.data.trainers);

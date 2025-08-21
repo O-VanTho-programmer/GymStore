@@ -13,7 +13,7 @@ function AddCategory({ onClose }) {
         e.preventDefault();
 
         try {
-            const res = await axios.post("http://localhost:5000/api/add_category", {
+            const res = await axios.post("gymstore-production.up.railway.app/api/add_category", {
                 name,
                 description,
                 images 
@@ -34,11 +34,11 @@ function AddCategory({ onClose }) {
         formData.append('image', file);
 
         try {
-            const response = await axios.post('http://localhost:5000/api/upload', formData, {
+            const response = await axios.post('gymstore-production.up.railway.app/api/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            // const imageUrl = `http://localhost:5000${}`;
+            // const imageUrl = `gymstore-production.up.railway.app${}`;
             setImages([...images, response.data.imageUrl]);
         } catch (error) {
             console.error('Error uploading image:', error);

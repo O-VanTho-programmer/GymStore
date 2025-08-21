@@ -22,7 +22,7 @@ function FitGigDetails() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/get_user_gig_detail/${gig_id}`);
+                const res = await axios.get(`gymstore-production.up.railway.app/api/get_user_gig_detail/${gig_id}`);
                 console.log(res.data.profile);
                 setProfile(res.data.profile);
                 setGig(res.data.gig);
@@ -37,7 +37,7 @@ function FitGigDetails() {
     useEffect(() => {
         const fetchReviewGig = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/get_gig_review/${gig_id}`)
+                const res = await axios.get(`gymstore-production.up.railway.app/api/get_gig_review/${gig_id}`)
                 console.log(res.data.reviews);
 
                 setReviews(res.data.reviews);
@@ -49,7 +49,7 @@ function FitGigDetails() {
 
         const fetchReviewProfile = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/get_profile_review/${profile.id}`)
+                const res = await axios.get(`gymstore-production.up.railway.app/api/get_profile_review/${profile.id}`)
                 console.log(res.data.reviews);
                 setReviews(res.data.reviews);
             } catch (error) {
@@ -68,7 +68,7 @@ function FitGigDetails() {
 
     const handleAddCommnet = async ({ comment, userRating }) => {
         try {
-            const res = await axios.post('http://localhost:5000/api/create_gig_review', {
+            const res = await axios.post('gymstore-production.up.railway.app/api/create_gig_review', {
                 userId: currentUser.userId,
                 gig_id,
                 rating: userRating,

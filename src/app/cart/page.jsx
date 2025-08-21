@@ -28,7 +28,7 @@ function Page() {
 
       const fetchData = async () => {
         try {
-          const res = await axios.post(`http://localhost:5000/api/get_order_detail/`, { userId: currentUser.userId });
+          const res = await axios.post(`gymstore-production.up.railway.app/api/get_order_detail/`, { userId: currentUser.userId });
           setOrderedProducts(res.data.orderDetails);
           setTotalPrice(res.data.totalPrice);
         } catch (error) {
@@ -39,7 +39,7 @@ function Page() {
 
       const fetcUserAddress = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/get_user_address/${currentUser.userId}`)
+          const res = await axios.get(`gymstore-production.up.railway.app/api/get_user_address/${currentUser.userId}`)
           setAddresses(res.data.addresses);
         } catch (error) {
 
@@ -59,7 +59,7 @@ function Page() {
 
   const updateQuantityDB = async ({ newQuantity, productId, orderId }) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/update_quantity_item', {
+      const res = await axios.post('gymstore-production.up.railway.app/api/update_quantity_item', {
         newQuantity,
         productId,
         orderId
@@ -77,7 +77,7 @@ function Page() {
 
   const deleteItem = async ({ productId, orderId }) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/delete_ordered_product', {
+      const res = await axios.post('gymstore-production.up.railway.app/api/delete_ordered_product', {
         productId,
         orderId
       })
@@ -90,7 +90,7 @@ function Page() {
 
   const handlePurchase = async () => {
     try {
-      const res = await axios.post(`http://localhost:5000/api/purchase`, {
+      const res = await axios.post(`gymstore-production.up.railway.app/api/purchase`, {
         userId: currentUser.userId,
         address: inputAddress
       })

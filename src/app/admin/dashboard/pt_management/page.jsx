@@ -14,7 +14,7 @@ function page() {
     useEffect(() => {
         const fetchTrainer = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/get_trainer');
+                const res = await axios.get('gymstore-production.up.railway.app/api/get_trainer');
                 setTrainerData(res.data.trainers);
                 console.log(res.data.trainers);
             } catch (err) {
@@ -28,7 +28,7 @@ function page() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/get_hired_clients/${trainerId}`);
+                const res = await axios.get(`gymstore-production.up.railway.app/api/get_hired_clients/${trainerId}`);
                 setHireClients(res.data.transactions);
             } catch (error) {
                 console.log(error);

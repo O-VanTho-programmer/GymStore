@@ -25,7 +25,7 @@ function Page() {
   useEffect(() => {
     const fetchExpertise = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/get_expertises/all");
+        const res = await axios.get("gymstore-production.up.railway.app/api/get_expertises/all");
         setExpertiseOptions(res.data.expertises);
       } catch (error) {
         console.error("Error fetching expertise:", error);
@@ -73,7 +73,7 @@ function Page() {
     formData.append('packages', JSON.stringify(validPackages));
 
     try {
-      const res = await axios.post('http://localhost:5000/api/create_gig', formData, {
+      const res = await axios.post('gymstore-production.up.railway.app/api/create_gig', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       console.log('Gig submitted successfully:', res.data);

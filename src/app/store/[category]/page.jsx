@@ -16,7 +16,7 @@ function page() {
   useEffect(() => {
     const fetchDataCategory = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/get_category_detail/${category}`);
+        const res = await axios.get(`gymstore-production.up.railway.app/api/get_category_detail/${category}`);
 
         const data = res.data.categoryDetail[0];
         setImageArray(data.images ? data.images.split(',') : []);
@@ -34,7 +34,7 @@ function page() {
     if (categoryDetail?.id) {
       const fetchDataProduct = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/get_product_by_category/${categoryDetail.id}`);
+          const res = await axios.get(`gymstore-production.up.railway.app/api/get_product_by_category/${categoryDetail.id}`);
           console.log(res.data.products);
           setProducts(res.data.products);
         } catch (error) {

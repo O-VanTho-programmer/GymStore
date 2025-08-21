@@ -36,7 +36,7 @@ function ChartLine({ transaction }) {
           ? `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-31`
           : `${selectedYear}-12-31`;
 
-        const res = await axios.get(`http://localhost:5000/api/get_revenue_and_sold`,{
+        const res = await axios.get(`gymstore-production.up.railway.app/api/get_revenue_and_sold`,{
           params: {
             start_date,
             end_date,

@@ -21,8 +21,8 @@ function page() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const resGig = await axios.get(`http://localhost:5000/api/get_user_gig_detail/${gig_id}`);
-                const resPackage = await axios.get(`http://localhost:5000/api/get_package/${package_id}`);
+                const resGig = await axios.get(`gymstore-production.up.railway.app/api/get_user_gig_detail/${gig_id}`);
+                const resPackage = await axios.get(`gymstore-production.up.railway.app/api/get_package/${package_id}`);
 
                 console.log(resGig.data.profile);
                 console.log(resGig.data.gig)
@@ -52,7 +52,7 @@ function page() {
         }
 
         try {
-            const res = await axios.post('http://localhost:5000/api/purchase_gig', {
+            const res = await axios.post('gymstore-production.up.railway.app/api/purchase_gig', {
                 packageId: parseInt(package_id),
                 trainerId: parseInt(trainer_id),
                 clientId: currentUser.userId,

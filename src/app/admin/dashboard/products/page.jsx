@@ -16,7 +16,7 @@ function page() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get('http://localhost:5000/api/get_transaction');
+        const res = await axios.get('gymstore-production.up.railway.app/api/get_transaction');
         setTransaction(res.data.transactions);
       } catch (err) {
         console.log(err);
