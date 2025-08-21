@@ -50,10 +50,11 @@ app.post('/api/upload/video', upload.single('video'), async (req, res) => {
 
 // MySQL connection setup
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'MySql@VanTho0948',
-  database: 'e_shopping',
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "MySql@VanTho0948",
+  database: process.env.DB_NAME || "e_shopping",
+  port: parseInt(process.env.DB_PORT || "3306", 10),
 }).promise();
 
 // Connect to MySQL
