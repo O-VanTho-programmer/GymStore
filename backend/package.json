@@ -1,34 +1,15 @@
 {
-  "name": "gym-store",
-  "version": "0.1.0",
-  "private": true,
+  "name": "gym-store-backend",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "node index.js"
   },
   "dependencies": {
-    "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
-    "chart.js": "^4.4.7",
     "cors": "^2.8.5",
     "exceljs": "^4.4.0",
     "express": "^4.21.2",
-    "framer-motion": "^12.4.1",
     "jsonwebtoken": "^9.0.2",
-    "leaflet": "^1.9.4",
     "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.12.0",
-    "next": "15.1.4",
-    "react": "^19.0.0",
-    "react-chartjs-2": "^5.3.0",
-    "react-dom": "^19.0.0",
-    "react-icons": "^5.4.0",
-    "react-leaflet": "^5.0.0"
-  },
-  "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "mysql2": "^3.12.0"
   }
 }
