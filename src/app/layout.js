@@ -11,9 +11,7 @@ import GlobalLoadingBar from "@/components/Loading/GlobalLoadingBar";
 export const metadata = {
   title: "Gym Store",
   description: "Gym Store and PT Searcher",
-  icons: {
-    icon: "/logo.png",
-  }
+  icon: "/logo.png",
 };
 
 export default function RootLayout({ children }) {
