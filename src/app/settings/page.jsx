@@ -34,7 +34,7 @@ function Page() {
     useEffect(() => {
         const fetcUserAddress = async () => {
             try {
-                const res = await axios.get(`gymstore-production.up.railway.app/api/get_user_address/${currentUser.userId}`)
+                const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_user_address/${currentUser.userId}`)
                 setAddresses(res.data.addresses);
                 console.log(res.data.addresses)
                 
@@ -67,7 +67,7 @@ function Page() {
         if (newPassword === confirmNewPassword) {
             setPending(true);
             try {
-                await axios.post('gymstore-production.up.railway.app/api/change_password', {
+                await axios.post('https://gymstore-production.up.railway.app/api/change_password', {
                     userId: currentUser.userId,
                     currentPassword,
                     newPassword
@@ -85,7 +85,7 @@ function Page() {
         e.preventDefault();
         setPending(true);
         try {
-            await axios.post('gymstore-production.up.railway.app/api/edit_profile', {
+            await axios.post('https://gymstore-production.up.railway.app/api/edit_profile', {
                 userId: currentUser.userId,
                 username,
                 email,
@@ -117,7 +117,7 @@ function Page() {
     const handleSendApplication = async () => {
         setPending(true);
         try {
-            const res = await axios.post('gymstore-production.up.railway.app/api/send_apply', {
+            const res = await axios.post('https://gymstore-production.up.railway.app/api/send_apply', {
                 userId: currentUser.userId,
                 bio,
                 certifications,

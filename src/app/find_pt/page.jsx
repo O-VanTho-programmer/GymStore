@@ -23,7 +23,7 @@ function page() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get(`gymstore-production.up.railway.app/api/get_expertises/all`);
+        const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_expertises/all`);
         setExpertises(res.data.expertises);
       } catch (error) {
         console.error('Error fetching expertises:', error);
@@ -39,7 +39,7 @@ function page() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await axios.get(`gymstore-production.up.railway.app/api/get_gigs_by_expetise/${expertise_id}`)
+        const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_gigs_by_expetise/${expertise_id}`)
         setGigsAndProfile(res.data.gigsAndProfile);
       } catch (error) {
         console.error('Error fetching gigs:', error);

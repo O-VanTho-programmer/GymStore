@@ -13,7 +13,7 @@ function ProductReview({ user, productId, rating, reviews, ratingCounts }) {
         }
 
         try {
-            const res = await axios.post("gymstore-production.up.railway.app/api/add_comment", {
+            const res = await axios.post("https://gymstore-production.up.railway.app/api/add_comment", {
                 userId: user.userId,
                 productId,
                 rating: userRating,

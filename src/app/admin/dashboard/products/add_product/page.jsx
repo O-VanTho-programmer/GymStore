@@ -27,7 +27,7 @@ function Page() {
     const handleSubmit = async () => {
         setPending(true);
         try {
-            const res = await axios.post("gymstore-production.up.railway.app/api/add_product",
+            const res = await axios.post("https://gymstore-production.up.railway.app/api/add_product",
                 {
                     productName,
                     description,
@@ -91,11 +91,11 @@ function Page() {
         formData.append('image', file);
 
         try {
-            const response = await axios.post('gymstore-production.up.railway.app/api/upload/image', formData, {
+            const response = await axios.post('https://gymstore-production.up.railway.app/api/upload/image', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            const imageUrl = `gymstore-production.up.railway.app${response.data.imageUrl}`;
+            const imageUrl = `https://gymstore-production.up.railway.app${response.data.imageUrl}`;
             setImages([...images, imageUrl]); // Add image to state
         } catch (error) {
             console.error('Error uploading image:', error);
@@ -112,7 +112,7 @@ function Page() {
     useEffect(() => {
         const fetchCategoryData = async () => {
             try {
-                const res = await axios.get("gymstore-production.up.railway.app/api/get_category");
+                const res = await axios.get("https://gymstore-production.up.railway.app/api/get_category");
 
                 setCategoryData(res.data.categories);
             } catch (error) {

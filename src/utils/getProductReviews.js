@@ -2,7 +2,7 @@ import axios from "axios";
 
 async function getProductReviews(productId) {
     try {
-        const res = await axios.get(`gymstore-production.up.railway.app/api/get_reviews/${productId}`);
+        const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_reviews/${productId}`);
 
         if (res.status !== 200) {
             throw new Error("Failed to fetch reviews");

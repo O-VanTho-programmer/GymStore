@@ -10,7 +10,7 @@ const CategoryTableAdmin = () => {
 
     useEffect(() => {
         const fetchData = async () =>{
-            const res = await axios.get("gymstore-production.up.railway.app/api/get_category");
+            const res = await axios.get("https://gymstore-production.up.railway.app/api/get_category");
             setCategories(res.data.categories);
         }
 

@@ -21,7 +21,7 @@ function DashboardLayout({ children }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`gymstore-production.up.railway.app/api/get_new_request/${currentUser.userId}`);
+                const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_new_request/${currentUser.userId}`);
                 setNotifications(res.data.requests);
             } catch (error) {
                 console.log("get new request error", error);

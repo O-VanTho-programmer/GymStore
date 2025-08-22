@@ -2,7 +2,7 @@ import axios from "axios";
 
 async function getProductItem(id) {
     try {
-        const res = await axios.get(`gymstore-production.up.railway.app/api/get_product_item/${id}`, {
+        const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_product_item/${id}`, {
             headers: { "Cache-Control": "no-store" },
         });
 

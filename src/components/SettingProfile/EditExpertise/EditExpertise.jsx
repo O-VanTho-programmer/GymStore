@@ -12,7 +12,7 @@ export default function EditExpertise({ profile_expertise, onClose, onSave, prof
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await axios.get(`gymstore-production.up.railway.app/api/get_expertises/${profileId}`);
+                const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_expertises/${profileId}`);
                 console.log(res.data.expertises);
                 setExpertises(res.data.expertises);
             } catch (error) {
@@ -35,7 +35,7 @@ export default function EditExpertise({ profile_expertise, onClose, onSave, prof
 
     const handleSave = async () => {
         try {
-            await axios.post(`gymstore-production.up.railway.app/api/edit_expertise`, {
+            await axios.post(`https://gymstore-production.up.railway.app/api/edit_expertise`, {
                 expertises: profileExpertise, profileId
             });
             onSave(profileExpertise);

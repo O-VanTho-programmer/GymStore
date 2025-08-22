@@ -78,5 +78,5 @@ It combines **e-commerce**, **personal training services**, and **community feat
 ---
 
 ## 🌐 API Integration
-The frontend connects to a backend API running at: gymstore-production.up.railway.app
+The frontend connects to a backend API running at: https://gymstore-production.up.railway.app
 

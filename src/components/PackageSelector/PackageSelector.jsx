@@ -9,7 +9,7 @@ export default function PackageSelector({ gigId, trainerId }) {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await axios.get(`gymstore-production.up.railway.app/api/get_package/${gigId}`);
+        const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_package/${gigId}`);
         
         if (!res.data.package) {
           console.error("Invalid response structure", res.data.package);

@@ -17,7 +17,7 @@ function SignUpPage() {
       return;
     }
     try {
-      const response = await axios.post('gymstore-production.up.railway.app/api/sign_up', {
+      const response = await axios.post('https://gymstore-production.up.railway.app/api/sign_up', {
         username, email, password
       });
 

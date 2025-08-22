@@ -11,8 +11,8 @@ function page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resDeliveringOrders = await axios.get(`gymstore-production.up.railway.app/api/get_order_delivering/${currentUser.userId}`);
-        const resHistoryOrders = await axios.get(`gymstore-production.up.railway.app/api/get_order_history/${currentUser.userId}`);
+        const resDeliveringOrders = await axios.get(`https://gymstore-production.up.railway.app/api/get_order_delivering/${currentUser.userId}`);
+        const resHistoryOrders = await axios.get(`https://gymstore-production.up.railway.app/api/get_order_history/${currentUser.userId}`);
 
         console.log(resHistoryOrders.data.orders);
         setDeliveringOrders(resDeliveringOrders.data.orders);

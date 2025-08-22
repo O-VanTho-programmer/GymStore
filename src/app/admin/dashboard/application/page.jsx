@@ -10,7 +10,7 @@ function page() {
     useEffect(() => {
         const fetchApplications = async () => {
             try {
-                const res = await axios.get('gymstore-production.up.railway.app/api/pt_applications');
+                const res = await axios.get('https://gymstore-production.up.railway.app/api/pt_applications');
                 setApplications(res.data.applications);
             } catch (error) {
                 console.error('Error fetching applications:', error);
@@ -24,7 +24,7 @@ function page() {
 
     const handleApprove = async (userId) => {
         try {
-            await axios.post('gymstore-production.up.railway.app/api/approve_application', { userId });
+            await axios.post('https://gymstore-production.up.railway.app/api/approve_application', { userId });
             setApplications(applications.map(app => app.userId === userId ? { ...app, status: 'approved' } : app));
         } catch (error) {
             console.error('Error approving application:', error);
@@ -33,7 +33,7 @@ function page() {
 
     const handleReject = async (userId) => {
         try {
-            await axios.post('gymstore-production.up.railway.app/api/reject_application', { userId });
+            await axios.post('https://gymstore-production.up.railway.app/api/reject_application', { userId });
             setApplications(applications.map(app => app.userId === userId ? { ...app, status: 'rejected' } : app));
         } catch (error) {
             console.error('Error rejecting application:', error);

@@ -23,7 +23,7 @@ function Page() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const res = await axios.get(`gymstore-production.up.railway.app/api/get_product/${nameSearch}`);
+                const res = await axios.get(`https://gymstore-production.up.railway.app/api/get_product/${nameSearch}`);
                 setProducts(res.data.products);
             } catch (error) {
                 console.log("Error fetch product data", error);
